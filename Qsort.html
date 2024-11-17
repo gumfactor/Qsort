@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Q-Sort Task</title>
+    <style>
+        #draggable {
+            width: 300px;
+            height: 50px;
+            background-color: lightblue;
+            text-align: center;
+            line-height: 50px;
+            margin: 10px auto;
+            cursor: grab;
+        }
+        .dropzone {
+            width: 200px;
+            min-height: 200px; /* Consistent height for all bins */
+            border: 2px dashed gray;
+            margin: 10px;
+            text-align: center;
+            padding: 10px;
+            position: relative;
+            display: inline-block;
+            vertical-align: top;
+        }
+        .count-icon {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: red;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            font-size: 12px;
+        }
+        .sortable-wrapper {
+            margin-top: 10px;
+        }
+        .sortable-item {
+            display: flex;
+            justify-content: space-between; /* Align text on the left and icon on the right */
+            align-items: center;
+            background-color: #f9f9f9;
+            padding: 5px 10px; /* Add some padding for spacing */
+            margin: 5px 0;
+            cursor: grab;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .sortable-item span {
+            flex-grow: 1; /* Ensure the sentence takes up remaining space */
+            text-align: left; /* Keep the sentence text aligned to the left */
+        }
+        .position-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background-color: gray;
+            color: white;
+            text-align: center;
+            line-height: 20px;
+            font-size: 12px;
+            border-radius: 3px;
+        }
+        #question-section {
+            display: none; /* Initially hidden */
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">Q-Sort Task</h1>
+
+    <!-- Draggable Sentence -->
+    <div id="draggable" draggable="true"></div>
+
+    <!-- Drop Zones -->
+    <div id="sorting-section" style="text-align: center;">
+        <!-- 9 Bins -->
+        <div class="dropzone" id="bin-1">
+            <span class="count-icon" id="count-bin-1">0</span>
+            Bin 1
+            <div class="sortable-wrapper"></div>
+        </div>
+        <div class="dropzone" id="bin-2">
+            <span class="count-icon" id="count-bin-2">0</span>
+            Bin 2
+            <div class="sortable-wrapper"></div>
+        </div>
+        <div class="dropzone" id="bin-3">
+            <span class="count-icon" id="count-bin-3">0</span>
+            Bin 3
+            <div class="sortable-wrapper"></div>
+        </div>
+        <div class="dropzone" id="bin-4">
+            <span class="count-icon" id="count-bin-4">0</span>
+            Bin 4
+            <div class="sortable-wrapper"></div>
+        </div>
+        <div class="dropzone" id="bin-5">
+            <span class="count-icon" id="count-bin-5">0</span>
+            Bin 5
+            <div class="sortable-wrapper"></div>
+        </div>
+        <div class="dropzone" id="bin-6">
+            <span class="count-icon" id="count-bin-6">0</span>
+            Bin 6
+            <div class="sortable-wrapper"></div>
+        </div>
+        <div class="dropzone" id="bin-7">
+            <span class="count-icon" id="count-bin-7">0</span>
+            Bin 7
+            <div class="sortable-wrapper"></div>
+        </div>
+        <div class="dropzone" id="bin-8">
+            <span class="count-icon" id="count-bin-8">0</span>
+            Bin 8
+            <div class="sortable-wrapper"></div>
+        </div>
+        <div class="dropzone" id="bin-9">
+            <span class="count-icon" id="count-bin-9">0</span>
+            Bin 9
+            <div class="sortable-wrapper"></div>
+        </div>
+        <!-- Save Data Button -->
+        <button id="finalizeSortButton" style="display: block; margin: 20px auto; padding: 10px 20px; font-size: 16px;">
+            I'm happy with my final sort
+        </button>
+    </div>
+
+    <!-- Questions Section -->
+    <div id="question-section">
+        <h2>Detailed Questions</h2>
+        <div id="questions-container"></div>
+    </div>
+
+    <!-- Include SortableJS -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+    <script>
+        const sentences = [
+            "Sentence 1: This is the first statement.",
+            "Sentence 2: Another example sentence.",
+            "Sentence 3: Sorting example here.",
+            "Sentence 4: Drag and drop example.",
+            "Sentence 5: Test another sentence."
+        ];
+        let currentIndex = 0;
+
+        const draggable = document.getElementById("draggable");
+        const status = document.getElementById("status");
+
+        function loadNextSentence() {
+            if (currentIndex < sentences.length) {
+                draggable.textContent = sentences[currentIndex];
+                currentIndex++;
+            } else {
+                draggable.textContent = ""; // Prevent duplication
+                draggable.draggable = false; // Disable dragging when no more sentences
+                draggable.style.cursor = "not-allowed"; // Change cursor to indicate it's not draggable
+                draggable.style.display = "none"; // Make the blue rectangle invisible
+            }
+        }
+
+        function updateCountAndPositions(wrapper) {
+            const countElement = wrapper.parentElement.querySelector(".count-icon");
+            const items = wrapper.querySelectorAll(".sortable-item");
+            countElement.textContent = items.length;
+
+            items.forEach((item, index) => {
+                const positionIcon = item.querySelector(".position-icon");
+                positionIcon.textContent = index + 1;
+            });
+        }
+
+        function getHighestRankedItems() {
+    const allBins = document.querySelectorAll(".dropzone .sortable-wrapper");
+    let highestRankedItems = [];
+
+    // Loop through bins in reverse order to find items
+    for (let i = allBins.length - 1; i >= 0; i--) {
+        const items = allBins[i].querySelectorAll(".sortable-item");
+        if (items.length > 0) {
+            highestRankedItems = [...items];
+            break;
+        }
+    }
+
+    return { topItems: highestRankedItems };
+}
+
+function showQuestions() {
+    const { topItems } = getHighestRankedItems(); // Fetch the highest-ranked items
+    const questionsContainer = document.getElementById("questions-container");
+    let currentQuestionIndex = 0; // Track which ranked item is being asked about
+
+    questionsContainer.innerHTML = ""; // Clear previous questions
+
+    function displayQuestion() {
+        if (currentQuestionIndex < 3 && currentQuestionIndex < topItems.length) { // Ask for the top 3 items
+            const currentSentence = topItems[currentQuestionIndex].querySelector("span").textContent;
+
+            questionsContainer.innerHTML = `
+                <h3>${currentQuestionIndex === 0 ? "Top 1" : currentQuestionIndex === 1 ? "Top 2" : "Top 3"}: ${currentSentence}</h3>
+                <p>Why was "${currentSentence}" so motivating?</p>
+                <input type="text" id="response1" style="width: 100%; padding: 10px; margin-bottom: 10px;" />
+                <p>What would make "${currentSentence}" more motivating?</p>
+                <input type="text" id="response2" style="width: 100%; padding: 10px; margin-bottom: 10px;" />
+                <button id="submitQuestions" style="padding: 10px 20px; margin-top: 10px;">Submit</button>
+            `;
+
+            document.getElementById("submitQuestions").addEventListener("click", () => {
+                const response1 = document.getElementById("response1").value;
+                const response2 = document.getElementById("response2").value;
+
+                // Log responses (replace with your preferred handling)
+                console.log(`${currentQuestionIndex === 0 ? "Top 1" : currentQuestionIndex === 1 ? "Top 2" : "Top 3"} - Why motivating: ${response1}`);
+                console.log(`${currentQuestionIndex === 0 ? "Top 1" : currentQuestionIndex === 1 ? "Top 2" : "Top 3"} - How to make it more motivating: ${response2}`);
+
+                currentQuestionIndex++; // Move to the next ranked item
+                displayQuestion(); // Display the next question set
+            });
+        } else {
+            // End of questions
+            questionsContainer.innerHTML = "<h3>Thank you for your responses!</h3>";
+        }
+    }
+
+    displayQuestion(); // Start asking questions
+
+    document.getElementById("sorting-section").style.display = "none";
+    document.getElementById("question-section").style.display = "block";
+}
+
+        document.getElementById("finalizeSortButton").addEventListener("click", showQuestions);
+
+        const wrappers = document.querySelectorAll(".sortable-wrapper");
+        wrappers.forEach(wrapper => {
+            new Sortable(wrapper, {
+                group: "shared",
+                animation: 150,
+                onAdd: function () {
+                    updateCountAndPositions(wrapper);
+                },
+                onUpdate: function () {
+                    updateCountAndPositions(wrapper);
+                },
+                onRemove: function () {
+                    updateCountAndPositions(wrapper);
+                }
+            });
+
+            wrapper.parentElement.addEventListener("dragover", event => {
+                event.preventDefault();
+            });
+
+            wrapper.parentElement.addEventListener("drop", event => {
+                event.preventDefault();
+                const droppedText = event.dataTransfer.getData("text/plain");
+                const origin = draggable.getAttribute("data-origin");
+
+                if (origin === "draggable") {
+                    const newItem = document.createElement("div");
+                    newItem.className = "sortable-item";
+
+                    const sentenceText = document.createElement("span");
+                    sentenceText.textContent = droppedText;
+
+                    const positionIcon = document.createElement("div");
+                    positionIcon.className = "position-icon";
+                    positionIcon.textContent = wrapper.querySelectorAll(".sortable-item").length + 1;
+
+                    newItem.appendChild(sentenceText);
+                    newItem.appendChild(positionIcon);
+                    wrapper.appendChild(newItem);
+
+                    updateCountAndPositions(wrapper);
+                    loadNextSentence();
+                }
+
+                draggable.setAttribute("data-origin", "");
+            });
+        });
+
+        draggable.addEventListener("dragstart", event => {
+            event.dataTransfer.setData("text/plain", draggable.textContent);
+            draggable.setAttribute("data-origin", "draggable");
+        });
+
+        loadNextSentence();
+    </script>
+</body>
+</html>
