@@ -126,24 +126,76 @@
 
 <!-- Enter Participant ID -->
 <div id="subject-id-section" style="text-align: center; margin-top: 200px; font-family: Arial, Helvetica, sans-serif;">
-    <h1>Welcome to the Q-Sort Task</h1>
-    <p>Please enter your Subject ID to begin:</p>
+    <h3>Please enter your Subject ID to begin:</h3>
     <input type="text" id="subjectID" placeholder="Enter Subject ID" style="padding: 10px; font-size: 16px; width: 300px; margin-bottom: 20px;">
     <br>
     <button id="subjectIDButton" style="padding: 10px 20px; font-size: 16px;">Submit</button>
+    <p><i>Please let the researcher know if you do not have a Participant ID</i></p>
 </div>
 
 <!-- Instructions Section -->
-<div id="instructions-section" style="text-align: center; margin-top: 200px; font-family: Arial, Helvetica, sans-serif;">
-    <h1>This is a Q-Sort Task</h1>
-    <p>Please read the following instructions carefully:</p>
-    <ul style="text-align: left; display: inline-block;">
-        <li>Drag and drop the sentences into the bins according to the provided criteria.</li>
-        <li>You can rearrange items within bins to adjust their rank.</li>
-        <li>Once you are satisfied with your sorting, press the "I'm happy with my final sort" button.</li>
-    </ul>
-    <br><br> <!-- Two lines of spacing -->
-    <button id="continueButton" style="padding: 10px 20px; font-size: 16px;">Continue</button>
+<div id="instructions-section" style="text-align: center; margin-top: 100px; font-family: Arial, Helvetica, sans-serif;">
+    <h1>The Empathic Q-Sort Task</h1>
+    <p>
+        In this task, you will be presented with descriptions of people in a variety of social situations and 
+        will be asked to indicate how motivated you would be to empathize with those people.
+    </p>
+    <p>
+        For instance, the display will look as follows:
+    </p>
+    <!-- Practice Drag/Drop Setup -->
+    <div id="practice-sorting-section" style="margin: 20px auto; text-align: center;">
+        <div id="draggable-practice" draggable="true" 
+             style="width: 500px; height: 50px; background-color: lightblue; text-align: center; line-height: 50px; 
+             margin: 10px auto; cursor: grab; font-family: Arial, Helvetica, sans-serif; font-size: 18px; font-weight: bold;">
+            Practice Sentence: Drag me into a bin!
+        </div>
+        <!-- Practice Bins -->
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px;">
+            <div class="dropzone" style="width: 160px; height: 160px; border: 2px dashed gray; text-align: center; 
+                 font-family: Arial, Helvetica, sans-serif;">
+                <p>1: Extremely Low Motivation</p>
+            </div>
+            <div class="dropzone" style="width: 160px; height: 160px; border: 2px dashed gray; text-align: center; 
+                 font-family: Arial, Helvetica, sans-serif;">
+                <p>2</p>
+            </div>
+            <div class="dropzone" style="width: 160px; height: 160px; border: 2px dashed gray; text-align: center; 
+                 font-family: Arial, Helvetica, sans-serif;">
+                <p>3</p>
+            </div>
+            <div class="dropzone" style="width: 160px; height: 160px; border: 2px dashed gray; text-align: center; 
+                 font-family: Arial, Helvetica, sans-serif;">
+                <p>4</p>
+            </div>
+            <div class="dropzone" style="width: 160px; height: 160px; border: 2px dashed gray; text-align: center; 
+                 font-family: Arial, Helvetica, sans-serif;">
+                <p>5: Some Motivation</p>
+            </div>
+            <div class="dropzone" style="width: 160px; height: 160px; border: 2px dashed gray; text-align: center; 
+                 font-family: Arial, Helvetica, sans-serif;">
+                <p>6</p>
+            </div>
+            <div class="dropzone" style="width: 160px; height: 160px; border: 2px dashed gray; text-align: center; 
+                 font-family: Arial, Helvetica, sans-serif;">
+                <p>7</p>
+            </div>
+            <div class="dropzone" style="width: 160px; height: 160px; border: 2px dashed gray; text-align: center; 
+                 font-family: Arial, Helvetica, sans-serif;">
+                <p>8</p>
+            </div>
+            <div class="dropzone" style="width: 160px; height: 160px; border: 2px dashed gray; text-align: center; 
+                 font-family: Arial, Helvetica, sans-serif;">
+                <p>9: Extremely High Motivation</p>
+            </div>
+        </div>
+    </div>
+    <p>
+        You will be able to drag each sentence into one of the bins to indicate how motivated you would be, 
+        from 1 (extremely unmotivated to empathize) to 9 (extremely motivated to empathize).
+    </p>
+    <p>Try it now with the mouse - drag the sentence into one of the bins.</p>
+    <button id="continueButton" style="padding: 10px 20px; font-size: 16px; margin-top: 20px;">Continue</button>
 </div>
     
     <!-- Q-Sort Task -->   
@@ -1053,6 +1105,173 @@ loadLogsFromLocalStorage();
         });
 
         loadNextSentence();
+
+// Add event listeners to practice draggable
+const practiceDraggable = document.getElementById("draggable-practice");
+practiceDraggable.addEventListener("dragstart", event => {
+    event.dataTransfer.setData("text/plain", practiceDraggable.textContent);
+    practiceDraggable.setAttribute("data-origin", "practice-draggable");
+});
+
+// Get all practice dropzones
+const practiceDropzones = document.querySelectorAll("#practice-sorting-section .dropzone");
+
+// Function to update counts and positions for practice bins
+function updatePracticeCountAndPositions(wrapper) {
+    const items = wrapper.querySelectorAll(".sortable-item");
+    
+    // Add or update count icon
+    let countIcon = wrapper.parentElement.querySelector(".count-icon");
+    if (!countIcon) {
+        countIcon = document.createElement("span");
+        countIcon.className = "count-icon";
+        wrapper.parentElement.appendChild(countIcon);
+    }
+    countIcon.textContent = items.length;
+
+    // Update position numbers
+    items.forEach((item, index) => {
+        let positionIcon = item.querySelector(".position-icon");
+        if (!positionIcon) {
+            positionIcon = document.createElement("div");
+            positionIcon.className = "position-icon";
+            item.appendChild(positionIcon);
+        }
+        positionIcon.textContent = index + 1;
+    });
+}
+
+// Add drag and drop functionality to each practice dropzone
+practiceDropzones.forEach(dropzone => {
+    // Create a wrapper div for sortable items if it doesn't exist
+    let sortableWrapper = dropzone.querySelector(".sortable-wrapper");
+    if (!sortableWrapper) {
+        sortableWrapper = document.createElement("div");
+        sortableWrapper.className = "sortable-wrapper";
+        dropzone.appendChild(sortableWrapper);
+    }
+
+    // Add dragover event listener
+    dropzone.addEventListener("dragover", event => {
+        event.preventDefault();
+        dropzone.style.backgroundColor = "#f0f0f0"; // Visual feedback
+    });
+
+    // Add dragleave event listener
+    dropzone.addEventListener("dragleave", event => {
+        event.preventDefault();
+        dropzone.style.backgroundColor = ""; // Reset background
+    });
+
+    // Add drop event listener
+    dropzone.addEventListener("drop", event => {
+        event.preventDefault();
+        dropzone.style.backgroundColor = ""; // Reset background
+        
+        const droppedText = event.dataTransfer.getData("text/plain");
+        const origin = practiceDraggable.getAttribute("data-origin");
+
+        if (origin === "practice-draggable") {
+            // Create new sortable item
+            const newItem = document.createElement("div");
+            newItem.className = "sortable-item";
+            newItem.draggable = true;
+            
+            const sentenceText = document.createElement("span");
+            sentenceText.textContent = droppedText;
+            
+            newItem.appendChild(sentenceText);
+            sortableWrapper.appendChild(newItem);
+
+            // Update counts and positions
+            updatePracticeCountAndPositions(sortableWrapper);
+
+            // Hide the practice draggable after successful drop
+            practiceDraggable.style.display = "none";
+            
+            // Show success message
+            const existingMessage = document.querySelector("#practice-success-message");
+            if (!existingMessage) {
+                const successMessage = document.createElement("p");
+                successMessage.id = "practice-success-message";
+                successMessage.style.color = "green";
+                successMessage.style.fontWeight = "bold";
+                successMessage.innerHTML = `
+                    Great! You've successfully completed the practice drop.<br>
+                    Try dragging the sentence between different bins to practice sorting.<br>
+                    When you're ready, click Continue to begin the task.
+                `;
+                document.querySelector("#practice-sorting-section").appendChild(successMessage);
+            }
+        }
+
+        practiceDraggable.setAttribute("data-origin", "");
+    });
+
+    // Make the wrapper sortable using SortableJS
+    new Sortable(sortableWrapper, {
+        group: "practice-shared", // Allows dragging between practice bins
+        animation: 150,
+        onAdd: function(evt) {
+            updatePracticeCountAndPositions(evt.to);
+            updatePracticeCountAndPositions(evt.from);
+        },
+        onUpdate: function(evt) {
+            updatePracticeCountAndPositions(evt.to);
+        },
+        onRemove: function(evt) {
+            updatePracticeCountAndPositions(evt.from);
+        }
+    });
+});
+
+// Add a reset button for practice
+const resetButton = document.createElement("button");
+resetButton.textContent = "Reset Practice";
+resetButton.style.cssText = "padding: 8px 16px; margin: 10px; display: none;"; // Initially hidden
+resetButton.addEventListener("click", () => {
+    // Clear all practice bins
+    practiceDropzones.forEach(dropzone => {
+        const wrapper = dropzone.querySelector(".sortable-wrapper");
+        if (wrapper) {
+            wrapper.innerHTML = "";
+        }
+        const countIcon = dropzone.querySelector(".count-icon");
+        if (countIcon) {
+            countIcon.textContent = "0";
+        }
+    });
+    
+    // Reset and show the practice draggable
+    practiceDraggable.style.display = "block";
+    
+    // Remove success message if it exists
+    const successMessage = document.querySelector("#practice-success-message");
+    if (successMessage) {
+        successMessage.remove();
+    }
+});
+
+document.querySelector("#practice-sorting-section").appendChild(resetButton);
+
+// Show reset button after first successful drop
+const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+        if (mutation.type === 'childList' && mutation.target.classList.contains('sortable-wrapper')) {
+            if (mutation.target.children.length > 0) {
+                resetButton.style.display = "inline-block";
+            } else if ([...practiceDropzones].every(zone => 
+                zone.querySelector('.sortable-wrapper').children.length === 0)) {
+                resetButton.style.display = "none";
+            }
+        }
+    });
+});
+
+practiceDropzones.forEach(dropzone => {
+    const wrapper = dropzone.querySelector(".sortable-wrapper");
+    observer.observe(wrapper, { childList: true });
+});
     </script>
 </body>
 </html>
