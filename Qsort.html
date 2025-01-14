@@ -823,7 +823,7 @@ document.getElementById("finalizeSortButton").addEventListener("click", () => {
         alert("Please sort all sentences into bins before finalizing.");
         return;
     }
-    const bins = document.querySelectorAll(".dropzone");
+    const bins = document.querySelectorAll("#sorting-section .dropzone");
     qSortData = [];
     bins.forEach((bin, binIndex) => {
         const items = bin.querySelectorAll(".sortable-item span");
@@ -954,7 +954,7 @@ function startSecondQSort() {
     qSortData2 = qSortData;
 
     // Reset bins
-    const bins = document.querySelectorAll(".dropzone .sortable-wrapper");
+    const bins = document.querySelectorAll("#sorting-section .dropzone .sortable-wrapper");
     bins.forEach(bin => {
         bin.innerHTML = "";
         const countElement = bin.parentElement.querySelector(".count-icon");
