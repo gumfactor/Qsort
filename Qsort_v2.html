@@ -449,6 +449,7 @@
 // Basic Setup
 // ==========================
 const taskName = "ECT1 Q-Sort";
+const versionNumber = "V2 (Nonvirtuous Qsort first)"
 let subjectID = "";
 const startTime = new Date();
 let qSortState = "firstQSort"; 
@@ -1344,6 +1345,7 @@ function downloadCSV() {
     let csvContent = "data:text/csv;charset=utf-8,";
 
     csvContent += `Name of Task,${taskName}\n`;
+    csvContent += `Version Number,${versionNumber}\n`;
     csvContent += `Time/Date,${timestamp}\n`;
     csvContent += `Duration,${duration} seconds\n`;
     csvContent += `SubjectID,${subjectID}\n\n`;
