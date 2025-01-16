@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Q-Sort Task</title>
+    <style>
+        #draggable {
+            width: 500px;
+            height: 50px;
+            background-color: lightblue;
+            text-align: center;
+            line-height: 50px;
+            margin: 10px auto;
+            cursor: grab;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+            position: absolute;
+            top: 240px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .dropzone-container {
+            display: inline-block;
+            text-align: center;
+            margin: 10px;
+            vertical-align: top;
+        }
+        .bin-label {
+            margin-bottom: 5px;
+        }
+        .bin-number {
+            padding-top: 160px;
+            font-weight: bold;
+            font-size: 30px;
+            line-height: 1.2;
+        }
+        .bin-name {
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            font-size: 16px;
+            color: black;
+        }
+        .dropzone {
+            width: 160px;
+            min-height: 160px;
+            border: 2px dashed gray;
+            margin: 10px;
+            text-align: center;
+            padding: 10px;
+            position: relative;
+            display: inline-block;
+            vertical-align: top;
+        }
+        .count-icon {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: red;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            font-size: 12px;
+        }
+        .sortable-wrapper {
+            margin-top: 10px;
+        }
+        .sortable-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f9f9f9;
+            padding: 5px 10px;
+            margin: 5px 0;
+            cursor: grab;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .sortable-item span {
+            flex-grow: 1;
+            text-align: left;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
+        }
+        .position-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background-color: gray;
+            color: white;
+            text-align: center;
+            line-height: 20px;
+            font-size: 12px;
+            border-radius: 3px;
+        }
+        .sentence-box {
+            width: 500px; 
+            background-color: lightblue;
+            text-align: center;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+            border: 1px solid gray;
+            padding: 10px;
+            margin: 40px 0 40px 250px;
+        }
+        #zoomed-bin .sortable-item span {
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+        }
+        #bottom-bin .sortable-item span {
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+        }
+        #zoomed-section h2 {
+            margin-top: -90px;
+        }
+        #zoomed-section p {
+            margin-top: -15px;
+        }
+        #bottom-section h2 {
+            margin-top: -90px;
+        }
+        #bottom-section p {
+            margin-top: -15px;
+        }
+        #ContinueToTaskButton, #BeginTaskButton3, #continueToDetailedQuestionsButton, #BeginTaskButton2, #BeginTaskButton, #subjectIDButton, #finalizeSortButton, #finalizeRerankButton, #finalizeBottomRerankButton, #continueButton {
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #ContinueToTaskButton:hover, #BeginTaskButton3:hover, #continueToDetailedQuestionsButton:hover, #BeginTaskButton2:hover, #BeginTaskButton:hover, #subjectIDButton:hover, #finalizeSortButton:hover, #finalizeRerankButton:hover, #finalizeBottomRerankButton:hover, #continueButton:hover {
+            background-color: #28a745;
+        }
+        #instructions-section, #sorting-section, #question-section {
+            display: none;
+        }
+        #instruction-text #instruction2-text{
+            max-width: 800px !important;
+            width: 100%;
+            margin: 0 auto !important;
+            text-align: center;
+            padding: 20px !important;
+            box-sizing: border-box;
+            border: 1px solid red;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Enter Participant ID -->
+<div id="subject-id-section" style="text-align: center; margin-top: 200px; font-family: Arial, Helvetica, sans-serif;">
+    <h3>Please enter your Subject ID to begin:</h3>
+    <input type="text" id="subjectID" placeholder="Enter Subject ID" style="padding: 10px; font-size: 16px; width: 300px; margin-bottom: 20px;">
+    <br>
+    <button id="subjectIDButton" style="padding: 10px 20px; font-size: 16px;">Submit</button>
+    <p><i>Please let the researcher know if you do not have a Participant ID</i></p>
+</div>
+
+<!-- Instructions Section -->
+<div id="instructions-section" style="display: none; font-family: Arial, Helvetica, sans-serif;">
+    <h1 id="task-header" style="text-align: center; margin-top: 100px;">The Empathic Q-Sort Task</h1>
+    <p id="instruction-text" style="
+        max-width: 810px; 
+        margin: 0 auto; 
+        text-align: center; 
+        line-height: 1.5; 
+        padding: 20px; 
+        box-sizing: border-box;">
+        In this task, you will be presented with descriptions of people in a variety of different social situations.<br><br>
+        For each scenario, we will ask you to indicate how motivated you would be to share feelings with that person <strong>for their benefit</strong>, or <strong>for your own benefit</strong>.<br><br>
+        That probably sounds a bit confusing, so let us explain:<br><br>
+        If we ask you to indicate how motivated you would be to share their feelings <strong>for their benefit</strong>:<br>
+        that would include a desire to share their feelings out of concern, out of sympathy, or in order to try to help them or reduce their pain.<br><br>
+        If we ask you to indicate how motivated you would be to share their feelings <strong>for your own benefit</strong>:<br>
+        that would include a desire to share their feelings in order to get something from them, in order to manipulate them, or in order to influence the situation for your benefit.<br><br>
+        So we'll ask you to indicate, for each scenario, how motivated you would be to share their feelings for one of those two reasons.<br><br>
+        If you understand to this point, press the button to continue the instructions.
+    </p>
+    <p id="instruction-additional" style="
+        max-width: 780px; 
+        margin: 0 auto; 
+        text-align: center; 
+        line-height: 1.5; 
+        padding: 20px; 
+        box-sizing: border-box; 
+        display: none;">
+        Notice that there is a sentence in the blue rectangle, and that there are 9 different boxes that range from 
+        <strong>1 Extremely Low Motivation</strong> to <strong>9 Extremely High Motivation</strong>.<br><br>
+        What you should do is use the mouse to drag each sentence into the box that best indicates 
+        your level of motivation to empathize with the person.
+    </p>
+    <button id="continueButton" style="padding: 10px 20px; font-size: 16px; margin: 20px auto 0; display: block;">Continue</button>
+</div>
+
+<!-- Instructions2 Section -->
+<div id="instructions2-section" style="display: none; text-align: center; margin-top: 100px; font-family: Arial, Helvetica, sans-serif;">
+    <p id="instruction2-text">
+        The real task will be exactly the same as the practice task, except that there will be 90 different scenarios.<br><br>
+        For each one, you should drag it into the appropriate box to indicate how motivated you would be to empathize
+        with the person in that scenario.<br><br><br><br>
+        If you understand, press the button to continue.
+    </p>
+    <button id="BeginTaskButton2" style="padding: 10px 20px; font-size: 16px; margin-top: 20px;">
+        Begin the Task
+    </button>
+</div>
+
+<!-- Instructions3 Section -->
+<div id="instructions3-section" style="display: none; text-align: center; margin-top: 100px; font-family: Arial, Helvetica, sans-serif;">
+    <p id="instruction3-text">
+        For this entire round, we want you to indicate how motivated you would be to share feelings with the person<br><br>
+        <strong>FOR YOUR BENEFIT</strong>
+        <br><br>If you understand these instructions, click the button below to begin the real task.
+    </p>
+    <button id="BeginTaskButton3" style="padding: 10px 20px; font-size: 16px; margin-top: 20px;">
+        Begin the Real Task
+    </button>
+</div>
+
+<!-- "Next Round" Instructions -->
+<div id="NextRoundInstructions" style="display: none; text-align: center; margin-top: 100px; font-family: Arial, Helvetica, sans-serif;">
+    <p>
+        Great - you're halfway through the task!<br><br>
+        Feel free to take a 2 minute break, but when you're ready we'll ask you to do the same thing
+        but this time we'll ask you to rank how motivated you would be to share the person's feelings<br><br>
+        <strong>FOR THEIR BENEFIT</strong><br><br>
+        When you’re ready, click Continue to begin the second round.
+    </p>
+    <button id="ContinueToTaskButton" style="padding: 10px 20px; font-size: 16px; margin-top: 20px;">
+        Continue to Second Round
+    </button>
+</div>
+
+<!-- Practice Drag/Drop Setup -->
+<div id="practice-sorting-section" style="margin: 20px auto; text-align: center; display: none;">
+    <div id="draggable-practice" draggable="true" 
+        style="width: 500px; height: 50px; background-color: lightblue; text-align: center; line-height: 50px; 
+        margin: 10px auto; cursor: grab; font-family: Arial, Helvetica, sans-serif; font-size: 18px; font-weight: bold;">
+        Practice Sentence: Drag me into a bin!
+    </div>
+    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px;">
+        <div class="dropzone" style="width: 160px; height: 160px; border: 2px dashed gray; text-align: center; 
+            font-family: Arial, Helvetica, sans-serif;">
+            <p>1: Extremely Low Motivation</p>
+        </div>
+        <div class="dropzone" style="width: 160px; height: 160px; border: 2px dashed gray; text-align: center; 
+            font-family: Arial, Helvetica, sans-serif;">
+            <p>2</p>
+        </div>
+        <div class="dropzone" style="width: 160px; height: 160px; border: 2px dashed gray; text-align: center; 
+            font-family: Arial, Helvetica, sans-serif;">
+            <p>3</p>
+        </div>
+        <div class="dropzone" style="width: 160px; height: 160px; border: 2px dashed gray; text-align: center; 
+            font-family: Arial, Helvetica, sans-serif;">
+            <p>4</p>
+        </div>
+        <div class="dropzone" style="width: 160px; height: 160px; border: 2px dashed gray; text-align: center; 
+            font-family: Arial, Helvetica, sans-serif;">
+            <p>5: Some Motivation</p>
+        </div>
+        <div class="dropzone" style="width: 160px; height: 160px; border: 2px dashed gray; text-align: center; 
+            font-family: Arial, Helvetica, sans-serif;">
+            <p>6</p>
+        </div>
+        <div class="dropzone" style="width: 160px; height: 160px; border: 2px dashed gray; text-align: center; 
+            font-family: Arial, Helvetica, sans-serif;">
+            <p>7</p>
+        </div>
+        <div class="dropzone" style="width: 160px; height: 160px; border: 2px dashed gray; text-align: center; 
+            font-family: Arial, Helvetica, sans-serif;">
+            <p>8</p>
+        </div>
+        <div class="dropzone" style="width: 160px; height: 160px; border: 2px dashed gray; text-align: center; 
+            font-family: Arial, Helvetica, sans-serif;">
+            <p>9: Extremely High Motivation</p>
+        </div>
+    </div>
+</div>
+    
+<!-- Q-Sort Task -->
+<div id="sorting-section" style="text-align: center;">
+    <p id="sentence-box-intro" style="
+        font-family: Arial, Helvetica, sans-serif; 
+        font-size: 18px;  
+        margin-bottom: 10px;">
+        <br>
+        How motivated would you be to share the feelings of the person <strong>for your benefit</strong>?
+    </p>
+    <div id="draggable" draggable="true"></div>
+    <!-- 9 Bins -->
+    <div class="dropzone-container">
+        <div class="bin-label">
+            <div class="bin-number">1</div>
+            <div class="bin-name">Extremely Low Motivation</div>
+        </div>
+        <div class="dropzone" id="bin-1">
+            <span class="count-icon" id="count-bin-1">0</span>
+            <div class="sortable-wrapper"></div>
+        </div>
+    </div>
+    <div class="dropzone-container">
+        <div class="bin-label">
+            <div class="bin-number">2</div>
+            <div class="bin-name">&nbsp;</div>
+        </div>
+        <div class="dropzone" id="bin-2">
+            <span class="count-icon" id="count-bin-2">0</span>
+            <div class="sortable-wrapper"></div>
+        </div>
+    </div>
+    <div class="dropzone-container">
+        <div class="bin-label">
+            <div class="bin-number">3</div>
+            <div class="bin-name">&nbsp;</div>
+        </div>
+        <div class="dropzone" id="bin-3">
+            <span class="count-icon" id="count-bin-3">0</span>
+            <div class="sortable-wrapper"></div>
+        </div>
+    </div>
+    <div class="dropzone-container">
+        <div class="bin-label">
+            <div class="bin-number">4</div>
+            <div class="bin-name">&nbsp;</div>
+        </div>
+        <div class="dropzone" id="bin-4">
+            <span class="count-icon" id="count-bin-4">0</span>
+            <div class="sortable-wrapper"></div>
+        </div>
+    </div>
+    <div class="dropzone-container">
+        <div class="bin-label">
+            <div class="bin-number">5</div>
+            <div class="bin-name">Some Motivation</div>
+        </div>
+        <div class="dropzone" id="bin-5">
+            <span class="count-icon" id="count-bin-5">0</span>
+            <div class="sortable-wrapper"></div>
+        </div>
+    </div>
+    <div class="dropzone-container">
+        <div class="bin-label">
+            <div class="bin-number">6</div>
+            <div class="bin-name">&nbsp;</div>
+        </div>
+        <div class="dropzone" id="bin-6">
+            <span class="count-icon" id="count-bin-6">0</span>
+            <div class="sortable-wrapper"></div>
+        </div>
+    </div>
+    <div class="dropzone-container">
+        <div class="bin-label">
+            <div class="bin-number">7</div>
+            <div class="bin-name">&nbsp;</div>
+        </div>
+        <div class="dropzone" id="bin-7">
+            <span class="count-icon" id="count-bin-7">0</span>
+            <div class="sortable-wrapper"></div>
+        </div>
+    </div>
+    <div class="dropzone-container">
+        <div class="bin-label">
+            <div class="bin-number">8</div>
+            <div class="bin-name">&nbsp;</div>
+        </div>
+        <div class="dropzone" id="bin-8">
+            <span class="count-icon" id="count-bin-8">0</span>
+            <div class="sortable-wrapper"></div>
+        </div>
+    </div>
+    <div class="dropzone-container">
+        <div class="bin-label">
+            <div class="bin-number">9</div>
+            <div class="bin-name">Extremely High Motivation</div>
+        </div>
+        <div class="dropzone" id="bin-9">
+            <span class="count-icon" id="count-bin-9">0</span>
+            <div class="sortable-wrapper"></div>
+        </div>
+    </div>
+    <button id="finalizeSortButton" style="display: block; margin: 20px auto; font-family: Arial, Helvetica, sans-serif; margin-top: 50px; padding: 10px 20px; font-size: 20px;">
+        I'm happy with my final sort
+    </button>
+</div>
+
+<!-- Introductory Question Text -->
+<div id="intro-text" style="margin: 20px auto; margin-top: 40px; width: 800px; text-align: center; font-family: Arial, Helvetica, sans-serif; font-size: 17px; line-height: 1.5;">
+    <p>We would now like to ask you some detailed questions about the scenarios that you ranked the Top 3 highest and the Bottom 3 lowest regarding your motivation to empathize.</p><br>
+    <p>We'll present them again in the blue rectangle and then ask you some questions about them - please answer as thoughtfully and honestly as you can.</p>
+    <button id="continueToDetailedQuestionsButton" 
+    style="padding: 10px 20px; font-size: 16px; margin-top: 20px; display: none;">
+    Continue to Detailed Questions
+    </button>
+</div>
+
+<!-- Questions Section -->
+<style>
+    p {
+        font-family: Helvetica, Arial, sans-serif; /* Consistent font for <p> elements */
+        font-size: 16px; /* Font size for <p> elements */
+        line-height: 1.5; /* Optional: Improves readability */
+    }
+</style>
+
+<div id="question-section" style="margin-top: 100px; margin-left: 600px; font-family: Arial, Helvetica, sans-serif;">
+    <h2 style="display: none;">Detailed Questions</h2>
+    <div id="questions-container"></div>
+</div>
+
+<div id="zoomed-section" style="display: none; text-align: center; height: 100vh; margin-top: 200px;">
+    <h2>Rerank Your <span style="color: green;">Top</span> 10 Sentences</h2><br>
+    <p>These are the top 10 scenarios that you ranked as <strong><span style="color: green;">most empathically motivating</span></strong>.</p><br>
+    <p>We would now like you to consider the very specific order of these scenarios, and to re-sort them so that they are ordered from the <strong><span style="color: green;">very most</span></strong> (on the top), to the <strong><span style="color: red;"> very least</span></strong> (on the bottom) empathically motivating .</p>
+    <div class="dropzone" id="zoomed-bin" style="width: 400px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 2px dashed gray; padding: 20px; text-align: center;">
+        <div class="sortable-wrapper"></div>
+    </div>
+    <button id="finalizeRerankButton" style="padding: 10px 20px; position: absolute; top: 60%; left: 50%; transform: translateX(-50%); margin-top: 50px;">
+        Finalize Rerank
+    </button>
+</div>
+
+<div id="bottom-section" style="display: none; text-align: center; height: 100vh; margin-top: 200px;">
+    <h2>Rerank Your <span style="color: red;">Bottom</span> 10 Sentences</h2><br>
+    <p>These are the bottom 10 scenarios that you ranked as <strong><span style="color: red;">least empathically motivating</span></strong>.</p><br>
+    <p>We would now like you to consider the very specific order of these scenarios, and to resort them so that they are ordered from the <strong><span style="color: red;">very least</span></strong> (on the top), to the <strong><span style="color: green;">very most</span></strong> empathically motivating (on the bottom).</p>
+    <div class="dropzone" id="bottom-bin" style="width: 400px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 2px dashed gray; padding: 20px; text-align: center;">
+        <div class="sortable-wrapper"></div>
+    </div>
+    <button id="finalizeBottomRerankButton" style="padding: 10px 20px; position: absolute; top: 60%; left: 50%; transform: translateX(-50%); margin-top: 50px;">
+        Finalize Rerank
+    </button>
+</div>
+
+<div id="thank-you-section" style="display: none; text-align: center;">
+    <h3>Thank you for participating in the Q-Sort task!</h3>
+    <p>Your data has been saved. You can now close this window.</p>
+</div>
+
+<!-- Include SortableJS -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<script>
+// ==========================
+// Basic Setup
+// ==========================
+const taskName = "ECT1 Q-Sort";
+let subjectID = "";
+const startTime = new Date();
+let qSortState = "firstQSort"; 
+
+document.getElementById("subjectID").addEventListener("input", (event) => {
+    subjectID = event.target.value.trim();
+});
+
+document.getElementById("subjectIDButton").addEventListener("click", function () {
+    const input = document.getElementById("subjectID").value; 
+    if (/^\d{4}$/.test(input)) {
+        subjectID = input;
+        document.getElementById("subject-id-section").style.display = "none"; 
+        document.getElementById("instructions-section").style.display = "block";
+    } else {
+        alert("Please enter a valid 4-digit Subject ID.");
+    }
+});
+
+window.addEventListener("load", () => {
+    document.getElementById("subject-id-section").style.display = "block";
+    document.getElementById("instructions-section").style.display = "none";
+    document.getElementById("sorting-section").style.display = "none";
+    document.getElementById("question-section").style.display = "none";
+    document.getElementById("intro-text").style.display = "none";
+    document.getElementById("zoomed-section").style.display = "none";
+    document.getElementById("bottom-section").style.display = "none";
+    document.getElementById("thank-you-section").style.display = "none";
+});
+
+document.getElementById("continueButton").addEventListener("click", function () {
+    document.getElementById("instruction-text").style.display = "none";
+    document.getElementById("instruction-additional").style.display = "block";
+    document.getElementById("practice-sorting-section").style.display = "block";
+    this.style.display = "none";
+});
+
+
+// ==========================
+// Data Arrays
+// ==========================
+let qSortData1 = [];
+let qSortData2 = [];
+let detailedResponses1 = [];
+let detailedResponses2 = [];
+
+let qSortData = []; // active array for the current Q-sort
+let rerankedTop10_1 = [];
+let rerankedBottom10_1 = [];
+let rerankedTop10_2 = [];
+let rerankedBottom10_2 = [];
+
+// ==========================
+// // The 90 Sentences
+// ==========================
+const sentences = [
+"You are standing in an elevator with a random stranger.",
+"You are out on a first date.",
+"An overworked nurse is going to treat your loved one.",
+"A man who owes you money also owes money to a dangerous individual.",
+"An employee of yours has just broken an ankle and is asking not to come into work.",
+"You are speaking to a politician about a policy you are passionate about.",
+"You are standing behind a stranger at the grocery store.",
+"A homeless man has taken a space outside your house/apartment building because he does not have a place to sleep tonight.",
+"You are being evaluated by your driving test instructor.",
+"You are considering asking a famous celebrity that you see in a restaurant for an autograph.",
+"Your roommate might get suspended for cheating with you on a test.",
+"A classmate asks for help because they are failing the class.",
+"You found out your best friend’s partner is cheating on them.",
+"A customer where you work begins to yell at you, but you are not sure why.",
+"Someone who is supporting you through a difficult time is reliving their trauma of being raped.",
+"You walk into a party where you do not know anyone else.",
+"An opponent in a race you are participating in believes they may be suffering a heart attack.",
+"You think your friend is telling lies about you.",
+"You are seeing an old friend after a really long time.",
+"You are trying to plan the perfect birthday party for your partner.",
+"A vendor at Costco is offering you a food sample.",
+"You are meeting your significant other’s family for the first time.",
+"You and your friend are both interviewing for the same job.",
+"You have been asked to sell something to a vulnerable customer.",
+"You want to ask your boss for a raise, but they seem to be in a bad mood.",
+"Your significant other’s parents seem upset about something you said.",
+"You are going into your annual review meeting.",
+"The driver in front of you has a terrible case of road rage.",
+"A journalist friend is writing their first big piece, and they have chosen to write it on you.",
+"You see a woman grieving loudly over the grave of her dead mother.",
+"Your partner seems to be upset about something.",
+"You bump into your ex who you left on bad terms.",
+"During a deep conversation, your friend suddenly seems worried about telling you something.",
+"You are unexpectedly called to HR.",
+"You are negotiating on a price at the farmer’s market.",
+"A friend who owes you money has just won the lottery.",
+"You are about to propose to your partner.",
+"You are working with an autistic child who is being a bit difficult.",
+"You want to ask someone out on a date.",
+"Your sister-in-law tells you she was assaulted by her husband/your brother.",
+"You are competing with a friend in a game of strategy.",
+"You are speaking with your doctor at your annual checkup.",
+"You are going for a job interview.",
+"A woman you helped get into rehab can't get clean.",
+"A friend is out celebrating his/her birthday and has not invited you.",
+"You are speaking to a research assistant about a study that you are participating in.",
+"You are playing rock paper scissors with a friend.",
+"You are asking someone questions about a situation you know that they have lied about before.",
+"A student who suffers from severe test anxiety has been seated next to you during a final exam.",
+"You want to ask a co-worker for a favor that may get them in trouble.",
+"You are babysitting someone else’s child.",
+"An attractive man/woman you would like to ask out has a flat tire on a deserted road.",
+"A stranger on the bus begins sharing their tragic life story with you.",
+"A house you have been wanting to purchase may come onto the market because the couple that currently owns it may lose it to bankruptcy.",
+"A friend, who was just arrested, has incriminating information about you that they could reveal.",
+"You are arguing with your parents.",
+"A child that has been abandoned on the street asks for donations.",
+"You need to tell your friend that you lost something valuable of theirs.",
+"You are arguing with your significant other.",
+"You see a new neighbor moving in next door.",
+"An important food critic is tasting your food for the first time.",
+"You are debating with someone about a social cause you have strong beliefs about.",
+"You are pulled over by the police.",
+"A man has just gotten into a car accident after yelling at you at a traffic stop.",
+"Someone approaches you to ask for directions.",
+"Someone looks like they need help, but it is unclear if they’ll be embarrassed if you approach them.",
+"You need to ask your professor for a reference letter.",
+"A man who has the same position as you at work is celebrating a big raise.",
+"You are in front of a judge in traffic court.",
+"Your waiter is struggling with too many tables and is slow to bring your food.",
+"You are talking to a bank teller about opening an account.",
+"You are working with a trainer at the gym.",
+"You just beat someone in a high-stakes game.",
+"One of the members of your group project seems distressed and is not pulling their weight.",
+"You are debating with someone about something you do not have a clear opinion about.",
+"You need to get your boss a Secret Santa present.",
+"A family member catches you doing something morally wrong.",
+"A new person is invited into your friend group.",
+"Your therapist just canceled their appointment with you last minute.",
+"You just moved in with a new roommate who seems stressed.",
+"Your boss tells you that they may be taking a new job.",
+"Someone you are interested in is getting ‘hit on’.",
+"You are worried that your friend is mad at you for something you did.",
+"Your best friend just found out that you and their partner had hooked up.",
+"A prostitute stands on the street corner where you live looking for her next client.",
+"You are asking a bank manager for a loan.",
+"Your art teacher is viewing your art project.",
+"You are ordering popcorn from a teenager at the movies.",
+"Your child’s teacher tells you they are having a hard time controlling their class.",
+"Someone you are interested in seems to be avoiding you recently."
+];
+let currentIndex = 0;
+const draggable = document.getElementById("draggable");
+
+function loadNextSentence() {
+    if (currentIndex < sentences.length) {
+        draggable.textContent = sentences[currentIndex];
+        currentIndex++;
+        draggable.style.display = "block";
+        draggable.draggable = true;
+        draggable.style.cursor = "grab";
+    } else {
+        draggable.textContent = "";
+        draggable.draggable = false;
+        draggable.style.cursor = "not-allowed";
+        draggable.style.display = "none";
+    }
+}
+loadNextSentence();
+
+// ==========================
+// Mandatory question logic
+// ==========================
+// We'll build the DOM for Q1/Q2 or Q3/Q4 on a single screen,
+// then disable Submit until all answers are filled.
+
+function enableOrDisableSubmitButton(phase, buttonId) {
+    // For "phase1" => we have input IDs: #q1Input, #q2Input
+    // For "phase2" => #q3Input (radio?), #q4Input (text?), etc.
+    // We'll do a quick check that each required field is answered
+    let allAnswered = true;
+    if (phase === "phase1") {
+        // Q1 text, Q2 text
+        const q1Val = document.getElementById("q1Input")?.value.trim() || "";
+        const q2Val = document.getElementById("q2Input")?.value.trim() || "";
+        if (!q1Val || !q2Val) allAnswered = false;
+    } 
+    else if (phase === "phase2") {
+        // For Q3 we have radio, for Q4 we have text
+        const selectedRadio = document.querySelector('input[name="powerdynamic"]:checked');
+        const q4Val = document.getElementById("q4Input")?.value.trim() || "";
+        if (!selectedRadio || !q4Val) allAnswered = false;
+    }
+    const btn = document.getElementById(buttonId);
+    if (btn) btn.disabled = !allAnswered;
+}
+
+
+// ==========================
+// Present the Q1/Q2 pairs
+// ==========================
+function displayPhase1QuestionsForItems(items, onComplete) {
+    let itemIndex = 0;
+    const container = document.getElementById("questions-container");
+    
+    function showQ1Q2ForCurrentItem() {
+        if (itemIndex >= items.length) {
+            onComplete();
+            return;
+        }
+        const currentItem = items[itemIndex];
+        // Figure out if it's top or bottom scenario
+        const labelText = computeScenarioLabel(itemIndex, items.length);
+        const half = items.length / 2;
+        const isTop = (itemIndex < half);   
+        const boxColor = isTop ? 'lightgreen' : 'lightpink'; 
+        const labelColor = isTop ? 'green' : 'red'; 
+
+        // Build HTML for both Q1 and Q2 on same screen
+        container.innerHTML = `
+        <h3>
+        <span style="font-weight: normal;">This was the scenario you ranked as the <strong style="color: ${labelColor};">${labelText}</strong>:</span>
+        </h3>
+        <div style="margin: 20px 0;">
+        <div class="sentence-box" style="background-color: ${boxColor};">
+            ${currentItem.text}
+        </div>
+        </div>
+        <div style="margin-top: 20px;">
+
+            <!-- Q1 -->
+            <p><strong>Why was this scenario so motivating?</strong></p>
+            <input type="text" id="q1Input" style="width: 600px; padding: 5px;" />
+
+            <br><br>
+
+            <!-- Q2 -->
+            <p><strong>What would make it more motivating?</strong></p>
+            <input type="text" id="q2Input" style="width: 600px; padding: 5px;" />
+
+            <br><br>
+
+            <button id="submitQ1Q2" style="padding: 10px 20px;" disabled>
+                Submit
+            </button>
+        `;
+
+        // Show question section, hide others
+        document.getElementById("intro-text").style.display = "none";
+        document.getElementById("question-section").style.display = "block";
+        document.getElementById("sorting-section").style.display = "none";
+        document.getElementById("zoomed-section").style.display = "none";
+        document.getElementById("bottom-section").style.display = "none";
+
+        // Listen for changes to enable/disable the button
+        const q1Input = document.getElementById("q1Input");
+        const q2Input = document.getElementById("q2Input");
+        [q1Input, q2Input].forEach(el => {
+            el.addEventListener("input", () => {
+                enableOrDisableSubmitButton("phase1", "submitQ1Q2");
+            });
+        });
+
+        // On submit, store data & move on
+        document.getElementById("submitQ1Q2").addEventListener("click", () => {
+            const q1Val = q1Input.value.trim() || "No response";
+            const q2Val = q2Input.value.trim() || "No response";
+            const responseArray = (qSortState === "firstQSort") ? detailedResponses1 : detailedResponses2;
+
+            // Store them
+            responseArray.push({
+                question: `Q1/Q2 for ${currentItem.text}`,
+                whyMotivating: q1Val,
+                howToImprove: q2Val,
+                timestamp: new Date().toISOString()
+            });
+            saveLogsToLocalStorage();
+
+            itemIndex++;
+            showQ1Q2ForCurrentItem();
+        });
+    }
+    showQ1Q2ForCurrentItem();
+}
+
+
+// ==========================
+// Present the Q3/Q4 pairs
+// ==========================
+function displayPhase2QuestionsForItems(items, onComplete) {
+    let itemIndex = 0;
+    const container = document.getElementById("questions-container");
+
+    function showQ3Q4ForCurrentItem() {
+        if (itemIndex >= items.length) {
+            onComplete();
+            return;
+        }
+        const currentItem = items[itemIndex];
+        const labelText = computeScenarioLabel(itemIndex, items.length);
+
+        const half = items.length / 2;
+        const isTop = (itemIndex < half);
+        const boxColor = isTop ? 'lightgreen' : 'lightpink';
+        const labelColor = isTop ? 'green' : 'red';
+
+        // Build HTML for Q3 (radio) and Q4 (text)
+        container.innerHTML = `
+            <h3><span style="font-weight: normal;">This was the scenario you ranked as the <strong style="color: ${labelColor};">${labelText}</strong>:</span>
+            </h3>
+            <div style="margin: 20px 0;">
+            <div class="sentence-box" style="background-color: ${boxColor};">
+                ${currentItem.text}
+            </div>
+            </div>
+            <div style="margin-top: 20px;">
+            <br>
+
+            <!-- Q3 -->
+            <p><strong>How would you describe the power dynamic between you and the target in this scenario?</strong></p>
+            <div id="radioGroup">
+                <label><input type="radio" name="powerdynamic" value="P>>T" />You have a significant amount of power</label><br>
+                <label><input type="radio" name="powerdynamic" value="P>T"  />You have a small amount of power</label><br>
+                <label><input type="radio" name="powerdynamic" value="P=T"  />Equal power</label><br>
+                <label><input type="radio" name="powerdynamic" value="P<T"  />They have a small amount of power over you</label><br>
+                <label><input type="radio" name="powerdynamic" value="P<<T" />They have a significant amount of power over you</label>
+            </div>
+            <br>
+
+            <!-- Q4 -->
+            <p><strong>How much did this power dynamic influence your desire to empathize with the target?</strong></p>
+            <input type="text" id="q4Input" style="width: 600px; padding: 5px;" />
+
+            <!-- Q5 -->
+            <p><strong>Is there anything else that you can think of that influenced your decision to empathize (or not empathize) with the person in this scenario? No wrong answers: we are interested in any insights that you can provide us with.</strong></p>
+            <input type="text" id="q5Input" style="width: 600px; height: 20px; padding: 5px;" />
+
+            <br><br>
+
+            <button id="submitQ3Q4" style="padding: 10px 20px;" disabled>
+                Submit
+            </button>
+        `;
+
+        document.getElementById("intro-text").style.display = "none";
+        document.getElementById("question-section").style.display = "block";
+        document.getElementById("sorting-section").style.display = "none";
+        document.getElementById("zoomed-section").style.display = "none";
+        document.getElementById("bottom-section").style.display = "none";
+
+        // Listen for changes to enable/disable the button
+        const radioGroup = document.querySelectorAll('input[name="powerdynamic"]');
+        const q4Input = document.getElementById("q4Input");
+        radioGroup.forEach(radio => {
+            radio.addEventListener("change", () => {
+                enableOrDisableSubmitButton("phase2", "submitQ3Q4");
+            });
+        });
+        q4Input.addEventListener("input", () => {
+            enableOrDisableSubmitButton("phase2", "submitQ3Q4");
+        });
+
+        // On submit
+        document.getElementById("submitQ3Q4").addEventListener("click", () => {
+            const selectedRadio = document.querySelector('input[name="powerdynamic"]:checked');
+            const powerDynamicVal = selectedRadio ? selectedRadio.value : "No selection";
+            const influenceVal = q4Input.value.trim() || "No response";
+            const anythingElseVal = q5Input.value.trim() || "No response";
+
+            const responseArray = (qSortState === "firstQSort") ? detailedResponses1 : detailedResponses2;
+
+            responseArray.push({
+                question: `Q3/Q4/Q5 for ${currentItem.text}`,
+                powerDynamic: powerDynamicVal,
+                powerInfluence: influenceVal,
+                anythingElse: anythingElseVal,
+                timestamp: new Date().toISOString()
+            });
+            saveLogsToLocalStorage();
+
+            itemIndex++;
+            showQ3Q4ForCurrentItem();
+        });
+    }
+    showQ3Q4ForCurrentItem();
+}
+
+
+// ==========================
+// Helper: scenario label
+// ==========================
+function computeScenarioLabel(itemIndex, totalItems) {
+    // If total = 6 => first 3 are top, last 3 are bottom
+    // itemIndex: 0->Top1, 1->Top2, 2->Top3, 3->Bottom1, 4->Bottom2, 5->Bottom3
+    // We'll produce e.g. "#1 most motivating" or "#1 least motivating"
+    const half = totalItems / 2; // expect 3 if total=6
+    if (itemIndex < half) {
+        return `#${itemIndex + 1} most motivating`;
+    } else {
+        // For bottom ones: itemIndex=3 => #1 least, itemIndex=4=>#2 least, ...
+        const bottomRank = itemIndex - half + 1;
+        return `#${bottomRank} least motivating`;
+    }
+}
+
+
+// ==========================
+// showQuestions() => Q1/Q2, then Q3/Q4
+// ==========================
+function showQuestions() {
+    // Figure out top/bottom items, but DON'T display them yet
+    const { topThree, bottomThree } = getTopAndBottomThreeItems();
+    const allItems = [...topThree, ...bottomThree];
+
+    // 1) Show the instructions (#intro-text)
+    document.getElementById("intro-text").style.display = "block";
+    document.getElementById("bottom-section").style.display = "none";
+    document.getElementById("question-section").style.display = "none";
+
+    // 3) Show our new button so the user can continue
+    const continueBtn = document.getElementById("continueToDetailedQuestionsButton");
+    continueBtn.style.display = "inline-block";
+
+    // 4) When the user clicks, hide instructions, show the first question
+    continueBtn.addEventListener("click", function handler() {
+        // Hide the instructions and the button
+        document.getElementById("intro-text").style.display = "none";
+        this.style.display = "none";
+
+        // Now actually display the questions
+        displayPhase1QuestionsForItems(allItems, function() {
+            // Then display Q3/Q4 pairs
+            displayPhase2QuestionsForItems(allItems, function() {
+                // The rest stays as in your original code
+                if (qSortState === "firstQSort") {
+                    qSortState = "secondQSort";
+                    document.getElementById("question-section").style.display = "none";
+                    document.getElementById("NextRoundInstructions").style.display = "block";
+                } else {
+                    // End
+                    qSortState = "complete";
+                    document.getElementById("sorting-section").style.display = "none";
+                    document.getElementById("zoomed-section").style.display = "none";
+                    document.getElementById("bottom-section").style.display = "none";
+                    document.getElementById("question-section").style.display = "none";
+                    document.getElementById("intro-text").style.display = "none";
+                    document.getElementById("thank-you-section").style.display = "block";
+                    downloadCSV();
+                }
+            });
+        });
+
+        // Remove this event listener so it doesn't double-fire
+        continueBtn.removeEventListener("click", handler);
+    });
+}
+
+// ==========================
+// Finalize Sort => show top/bottom bin
+// ==========================
+document.getElementById("finalizeSortButton").addEventListener("click", () => {
+    if (draggable.style.display !== "none" && draggable.textContent.trim() !== "") {
+        alert("Please sort all sentences into bins before finalizing.");
+        return;
+    }
+    const bins = document.querySelectorAll("#sorting-section .dropzone");
+    qSortData = [];
+    bins.forEach((bin, binIndex) => {
+        const items = bin.querySelectorAll(".sortable-item span");
+        items.forEach((item, itemIndex) => {
+            qSortData.push({
+                bin: binIndex + 1,
+                position: itemIndex + 1,
+                text: item.textContent
+            });
+        });
+    });
+    if (qSortState === "firstQSort") {
+        qSortData1 = [...qSortData];
+    } else {
+        qSortData2 = [...qSortData];
+    }
+    saveLogsToLocalStorage();
+
+    populateZoomedBin();
+    document.getElementById("sorting-section").style.display = "none";
+    document.getElementById("zoomed-section").style.display = "block";
+});
+
+function populateZoomedBin() {
+    const top10Items = getTop10Items();
+    const zoomedWrapper = document.querySelector("#zoomed-bin .sortable-wrapper");
+    zoomedWrapper.innerHTML = "";
+    top10Items.forEach((item, index) => {
+        const newItem = document.createElement("div");
+        newItem.className = "sortable-item";
+        newItem.innerHTML = `
+            <span>${item.text}</span>
+            <div class="position-icon">${index + 1}</div>
+        `;
+        zoomedWrapper.appendChild(newItem);
+    });
+}
+new Sortable(document.querySelector("#zoomed-bin .sortable-wrapper"), {
+    animation: 150,
+    onUpdate: function () {
+        const items = document.querySelectorAll("#zoomed-bin .sortable-item");
+        items.forEach((item, index) => {
+            const positionIcon = item.querySelector(".position-icon");
+            if (positionIcon) positionIcon.textContent = index + 1;
+        });
+    }
+});
+
+document.getElementById("finalizeRerankButton").addEventListener("click", () => {
+    const zoomedItems = document.querySelectorAll("#zoomed-bin .sortable-item span");
+    const rerankedTopItems = [];
+    zoomedItems.forEach((item, index) => {
+        rerankedTopItems.push({
+            position: index + 1,
+            text: item.textContent
+        });
+    });
+    if (qSortState === "firstQSort") {
+        rerankedTop10_1 = rerankedTopItems;
+    } else {
+        rerankedTop10_2 = rerankedTopItems;
+    }
+    saveLogsToLocalStorage();
+    populateBottomBin();
+    document.getElementById("zoomed-section").style.display = "none";
+    document.getElementById("bottom-section").style.display = "block";
+});
+
+function populateBottomBin() {
+    const bottom10Items = getBottom10Items();
+    const bottomWrapper = document.querySelector("#bottom-bin .sortable-wrapper");
+    bottomWrapper.innerHTML = "";
+    bottom10Items.forEach((item, index) => {
+        const newItem = document.createElement("div");
+        newItem.className = "sortable-item";
+        newItem.innerHTML = `
+            <span>${item.text}</span>
+            <div class="position-icon">${index + 1}</div>
+        `;
+        bottomWrapper.appendChild(newItem);
+    });
+}
+new Sortable(document.querySelector("#bottom-bin .sortable-wrapper"), {
+    animation: 150,
+    onUpdate: function () {
+        const items = document.querySelectorAll("#bottom-bin .sortable-item");
+        items.forEach((item, index) => {
+            const positionIcon = item.querySelector(".position-icon");
+            if (positionIcon) positionIcon.textContent = index + 1;
+        });
+    }
+});
+
+document.getElementById("finalizeBottomRerankButton").addEventListener("click", () => {
+    const bottomItems = document.querySelectorAll("#bottom-bin .sortable-item span");
+    const rerankedBottomItems = [];
+    bottomItems.forEach((item, index) => {
+        rerankedBottomItems.push({
+            position: index + 1,
+            text: item.textContent
+        });
+    });
+    if (qSortState === "firstQSort") {
+        rerankedBottom10_1 = rerankedBottomItems;
+        // After finishing first Q-sort bins, show Q1/Q2->Q3/Q4
+        showQuestions();
+    } else {
+        rerankedBottom10_2 = rerankedBottomItems;
+        // After second Q-sort bins, do second Q1/Q2->Q3/Q4
+        showQuestions();
+    }
+    saveLogsToLocalStorage();
+});
+
+// ==========================
+// Start second Q-Sort
+// ==========================
+function startSecondQSort() {
+    if (qSortState !== "secondQSort") {
+        console.warn("Cannot start second Q-Sort. Current state:", qSortState);
+        return;
+    }
+    if (qSortData1.length === 0) {
+        console.warn("Warning: qSortData1 is empty before starting second Q-Sort.");
+    }
+    qSortData1 = [...qSortData];
+    qSortData = [];
+    qSortData2 = qSortData;
+
+    // Reset bins
+    const bins = document.querySelectorAll("#sorting-section .dropzone .sortable-wrapper");
+    bins.forEach(bin => {
+        bin.innerHTML = "";
+        const countElement = bin.parentElement.querySelector(".count-icon");
+        if (countElement) countElement.textContent = "0";
+    });
+
+    document.getElementById("sentence-box-intro").innerHTML = `
+        <br>
+        How motivated would you be to share the feelings of the person <strong>for their benefit</strong>?
+    `;
+
+    document.getElementById("sorting-section").style.display = "block";
+    document.getElementById("bottom-section").style.display = "none";
+    document.getElementById("zoomed-section").style.display = "none";
+    document.getElementById("question-section").style.display = "none";
+    document.getElementById("intro-text").style.display = "none";
+
+    currentIndex = 0;
+    loadNextSentence();
+}
+
+// ==========================
+// Utility: get top/bottom
+// ==========================
+function getTop10Items() {
+    const allBins = document.querySelectorAll(".dropzone .sortable-wrapper");
+    const allItems = [];
+    allBins.forEach((bin, binIndex) => {
+        const items = bin.querySelectorAll(".sortable-item span");
+        items.forEach((item, itemIndex) => {
+            if (item.textContent.trim() !== "Practice Sentence: Drag me into a bin!") {
+                allItems.push({
+                    bin: binIndex + 1,
+                    position: itemIndex + 1,
+                    text: item.textContent
+                });
+            }
+        });
+    });
+    allItems.sort((a, b) => (a.bin - b.bin) || (a.position - b.position));
+    const unique = [];
+    const seen = new Set();
+    for (let obj of allItems) {
+        if (!seen.has(obj.text)) {
+            seen.add(obj.text);
+            unique.push(obj);
+        }
+    }
+    return unique.slice(0, 10);
+}
+
+function getBottom10Items() {
+    const allBins = document.querySelectorAll(".dropzone .sortable-wrapper");
+    const allItems = [];
+    allBins.forEach((bin, binIndex) => {
+        const items = bin.querySelectorAll(".sortable-item span");
+        items.forEach((item, itemIndex) => {
+            if (item.textContent.trim() !== "Practice Sentence: Drag me into a bin!") {
+                allItems.push({
+                    bin: binIndex + 1,
+                    position: itemIndex + 1,
+                    text: item.textContent
+                });
+            }
+        });
+    });
+    // Sort descending
+    allItems.sort((a, b) => (b.bin - a.bin) || (b.position - a.position));
+    const unique = [];
+    const seen = new Set();
+    for (let obj of allItems) {
+        if (!seen.has(obj.text)) {
+            seen.add(obj.text);
+            unique.push(obj);
+        }
+    }
+    return unique.slice(0, 10);
+}
+
+// For final questions
+function getTopAndBottomThreeItems() {
+    const allBins = document.querySelectorAll(".dropzone .sortable-wrapper");
+    const allItems = [];
+    allBins.forEach((bin, binIndex) => {
+        const items = bin.querySelectorAll(".sortable-item span");
+        items.forEach((item, itemIndex) => {
+            allItems.push({
+                bin: binIndex + 1,
+                position: itemIndex + 1,
+                text: item.textContent.trim()
+            });
+        });
+    });
+    const filtered = allItems.filter(i =>
+        i.text.toLowerCase() !== "practice sentence: drag me into a bin!"
+    );
+    filtered.sort((a, b) => (a.bin - b.bin) || (a.position - b.position));
+    const topThree = filtered.slice(0, 3);
+    const bottomThree = filtered.slice(-3);
+    return { topThree, bottomThree };
+}
+
+// ==========================
+// Drag/Drop Logic
+// ==========================
+const wrappers = document.querySelectorAll(".sortable-wrapper");
+wrappers.forEach(wrapper => {
+    new Sortable(wrapper, {
+        group: "shared",
+        animation: 150,
+        onAdd: () => updateCountAndPositions(wrapper),
+        onUpdate: () => updateCountAndPositions(wrapper),
+        onRemove: () => updateCountAndPositions(wrapper)
+    });
+    wrapper.parentElement.addEventListener("dragover", event => event.preventDefault());
+    wrapper.parentElement.addEventListener("drop", event => {
+        event.preventDefault();
+        const droppedText = event.dataTransfer.getData("text/plain");
+        const origin = draggable.getAttribute("data-origin");
+        if (origin === "draggable") {
+            const newItem = document.createElement("div");
+            newItem.className = "sortable-item";
+            newItem.innerHTML = `<span>${droppedText}</span>`;
+            wrapper.appendChild(newItem);
+            updateCountAndPositions(wrapper);
+            loadNextSentence();
+        }
+        draggable.setAttribute("data-origin", "");
+    });
+});
+
+function updateCountAndPositions(wrapper) {
+    const countElement = wrapper.parentElement.querySelector(".count-icon");
+    const items = wrapper.querySelectorAll(".sortable-item");
+    countElement.textContent = items.length;
+}
+
+draggable.addEventListener("dragstart", event => {
+    event.dataTransfer.setData("text/plain", draggable.textContent);
+    draggable.setAttribute("data-origin", "draggable");
+});
+
+
+// ==========================
+// Practice Draggable
+// ==========================
+const practiceDraggable = document.getElementById("draggable-practice");
+practiceDraggable.addEventListener("dragstart", event => {
+    event.dataTransfer.setData("text/plain", practiceDraggable.textContent);
+    practiceDraggable.setAttribute("data-origin", "practice-draggable");
+});
+const practiceDropzones = document.querySelectorAll("#practice-sorting-section .dropzone");
+practiceDropzones.forEach(dropzone => {
+    let sortableWrapper = dropzone.querySelector(".sortable-wrapper");
+    if (!sortableWrapper) {
+        sortableWrapper = document.createElement("div");
+        sortableWrapper.className = "sortable-wrapper";
+        dropzone.appendChild(sortableWrapper);
+    }
+    dropzone.addEventListener("dragover", event => {
+        event.preventDefault();
+        dropzone.style.backgroundColor = "#f0f0f0";
+    });
+    dropzone.addEventListener("dragleave", event => {
+        event.preventDefault();
+        dropzone.style.backgroundColor = "";
+    });
+    dropzone.addEventListener("drop", event => {
+        event.preventDefault();
+        dropzone.style.backgroundColor = "";
+        const droppedText = event.dataTransfer.getData("text/plain");
+        const origin = practiceDraggable.getAttribute("data-origin");
+        if (origin !== "practice-draggable" || practiceDraggable.style.display === "none") return;
+        event.stopPropagation();
+        const existingItem = sortableWrapper.querySelectorAll(".sortable-item span");
+        for (let item of existingItem) {
+            if (item.textContent === droppedText) {
+                practiceDraggable.setAttribute("data-origin", "");
+                return;
+            }
+        }
+        const newItem = document.createElement("div");
+        newItem.className = "sortable-item";
+        newItem.draggable = true;
+        newItem.innerHTML = `<span>${droppedText}</span>`;
+        sortableWrapper.appendChild(newItem);
+        updatePracticeCountAndPositions(sortableWrapper);
+        practiceDraggable.style.display = "none";
+
+        const existingMessage = document.querySelector("#practice-success-text");
+        if (!existingMessage) {
+            const successText = document.createElement("p");
+            successText.id = "practice-success-text";
+            successText.style.color = "green";
+            successText.style.fontWeight = "bold";
+            successText.style.fontFamily = "Helvetica, Arial, sans-serif"; // Added font family
+            successText.style.fontSize = "16px"; // Added font size
+            successText.innerHTML = `
+                <br>Great! You've successfully completed the practice drop.<br><br><br>
+                <span class="instruction-text" style="color: red; font-weight: bold;">
+                    You can also drag the sentences between bins if you ever want to rebin them.<br><br>
+                    Can you try doing that now by dragging the sentence you dropped into another bin?
+                </span><br><br>
+                <span id="continue-text" class="instruction-text" style="display: none;">
+                    Great! That's all there is to it! So, when you're ready, click Continue to go to the real task.
+                </span>
+            `;
+            const beginTaskButton = document.createElement("button");
+            beginTaskButton.id = "BeginTaskButton";
+            beginTaskButton.style.padding = "10px 20px";
+            beginTaskButton.style.fontSize = "16px";
+            beginTaskButton.style.margin = "20px auto";
+            beginTaskButton.style.display = "none";
+            beginTaskButton.textContent = "Continue to Task";
+
+            const practiceSortingSection = document.querySelector("#practice-sorting-section");
+            const binsContainer = practiceSortingSection.querySelector("div[style*='display: flex']");
+            practiceSortingSection.insertBefore(successText, binsContainer);
+            practiceSortingSection.appendChild(beginTaskButton);
+
+            document.getElementById("BeginTaskButton").addEventListener("click", function () {
+                document.getElementById("practice-sorting-section").style.display = "none";
+                document.getElementById("instruction-additional").style.display = "none";
+                document.getElementById("instructions2-section").style.display = "block";
+                this.style.display = "none";
+            });
+
+            // instructions2 => instructions3
+            document.getElementById("BeginTaskButton2").addEventListener("click", function () {
+                document.getElementById("instructions2-section").style.display = "none";
+                document.getElementById("instructions3-section").style.display = "block";
+                this.style.display = "none";
+            });
+
+            // instructions3 => real task
+            document.getElementById("BeginTaskButton3").addEventListener("click", function () {
+                document.getElementById("instructions3-section").style.display = "none";
+                document.getElementById("sorting-section").style.display = "block";
+                this.style.display = "none";
+            });
+
+            // starting the next round
+            document.getElementById("ContinueToTaskButton").addEventListener("click", function() {
+            document.getElementById("NextRoundInstructions").style.display = "none";
+            startSecondQSort();
+            });
+        }
+        practiceDraggable.setAttribute("data-origin", "");
+    });
+    new Sortable(sortableWrapper, {
+        group: "practice-shared",
+        animation: 150,
+        onAdd: function(evt) {
+            updatePracticeCountAndPositions(evt.to);
+            updatePracticeCountAndPositions(evt.from);
+            const continueText = document.getElementById("continue-text");
+            const beginTaskButton = document.getElementById("BeginTaskButton");
+            if (continueText && continueText.style.display === "none") {
+                continueText.style.display = "inline";
+            }
+            if (continueText && continueText.style.display === "inline" && beginTaskButton) {
+                beginTaskButton.style.display = "block";
+            }
+        },
+        onUpdate: function(evt) {
+            updatePracticeCountAndPositions(evt.to);
+        },
+        onRemove: function(evt) {
+            updatePracticeCountAndPositions(evt.from);
+        }
+    });
+});
+function updatePracticeCountAndPositions(wrapper) {
+    const items = wrapper.querySelectorAll(".sortable-item");
+    let countIcon = wrapper.parentElement.querySelector(".count-icon");
+    if (!countIcon) {
+        countIcon = document.createElement("span");
+        countIcon.className = "count-icon";
+        wrapper.parentElement.appendChild(countIcon);
+    }
+    countIcon.textContent = items.length;
+    items.forEach((item, index) => {
+        let positionIcon = item.querySelector(".position-icon");
+        if (!positionIcon) {
+            positionIcon = document.createElement("div");
+            positionIcon.className = "position-icon";
+            item.appendChild(positionIcon);
+        }
+        positionIcon.textContent = index + 1;
+    });
+}
+
+// ==========================
+// CSV Download etc.
+// ==========================
+function downloadCSV() {
+    const endTime = new Date();
+    const duration = Math.round((endTime - startTime) / 1000);
+    const timestamp = endTime.toISOString();
+    let csvContent = "data:text/csv;charset=utf-8,";
+
+    csvContent += `Name of Task,${taskName}\n`;
+    csvContent += `Time/Date,${timestamp}\n`;
+    csvContent += `Duration,${duration} seconds\n`;
+    csvContent += `SubjectID,${subjectID}\n\n`;
+
+    csvContent += "First Q-Sort Data\nTimestamp,Bin,Position,Text\n";
+    qSortData1.forEach(row => {
+        csvContent += `${row.timestamp},${row.bin},${row.position},"${row.text}"\n`;
+    });
+    csvContent += "\nFirst Top 10 Rerank\nTimestamp,Position,Text\n";
+    rerankedTop10_1.forEach(row => {
+        csvContent += `${row.timestamp},${row.position},"${row.text}"\n`;
+    });
+    csvContent += "\nFirst Bottom 10 Rerank\nTimestamp,Position,Text\n";
+    rerankedBottom10_1.forEach(row => {
+        csvContent += `${row.timestamp},${row.position},"${row.text}"\n`;
+    });
+
+    csvContent += "\nDetailed Responses (First Q-Sort)\nTimestamp,Question,Why Motivating,How to Improve,Power Dynamic,Power Influence,Other Factors\n";
+    detailedResponses1.forEach(r => {
+        csvContent += `${r.timestamp},"${r.question}","${r.whyMotivating || ''}","${r.howToImprove || ''}","${r.powerDynamic || ''}","${r.powerInfluence || ''}","${r.anythingElse || ''}"\n`;
+    });
+
+    csvContent += "\nSecond Q-Sort Data\nTimestamp,Bin,Position,Text\n";
+    qSortData2.forEach(row => {
+        csvContent += `${row.timestamp},${row.bin},${row.position},"${row.text}"\n`;
+    });
+    csvContent += "\nSecond Top 10 Rerank\nTimestamp,Position,Text\n";
+    rerankedTop10_2.forEach(row => {
+        csvContent += `${row.timestamp},${row.position},"${row.text}"\n`;
+    });
+    csvContent += "\nSecond Bottom 10 Rerank\nTimestamp,Position,Text\n";
+    rerankedBottom10_2.forEach(row => {
+        csvContent += `${row.timestamp},${row.position},"${row.text}"\n`;
+    });
+
+    csvContent += "\nDetailed Responses (Second Q-Sort)\nTimestamp,Question,Why Motivating,How to Improve,Power Dynamic,Power Influence,Other Factors\n";
+    detailedResponses2.forEach(r => {
+        csvContent += `${r.timestamp},"${r.question}","${r.whyMotivating || ''}","${r.howToImprove || ''}","${r.powerDynamic || ''}","${r.powerInfluence || ''}","${r.anythingElse || ''}"\n`;
+    });
+
+    try {
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "qsort_data.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        setTimeout(() => { 
+            clearLogsFromLocalStorage();
+            window.location.href = "https://uoitsocialscience.eu.qualtrics.com/jfe/form/SV_8wCmzDwF4NY0BrE";
+        }, 100);
+    } catch (error) {
+        console.error("Error during CSV download:", error);
+        console.warn("LocalStorage will not be cleared due to error.");
+    }
+}
+
+let cleared = false;
+function clearLogsFromLocalStorage() {
+    cleared = true;
+    localStorage.removeItem('qSortLogs');
+    qSortData1 = [];
+    qSortData2 = [];
+    detailedResponses1 = [];
+    detailedResponses2 = [];
+    rerankedTop10_1 = [];
+    rerankedBottom10_1 = [];
+    rerankedTop10_2 = [];
+    rerankedBottom10_2 = [];
+}
+
+function saveLogsToLocalStorage() {
+    if (cleared) {
+        console.warn("Attempted to save logs after data was cleared. Ignoring save.");
+        return;
+    }
+    const timestamp = new Date().toISOString();
+    // Add timestamps if missing
+    qSortData1 = qSortData1.map(row => ({ ...row, timestamp: row.timestamp || timestamp }));
+    qSortData2 = qSortData2.map(row => ({ ...row, timestamp: row.timestamp || timestamp }));
+    rerankedTop10_1 = rerankedTop10_1.map(row => ({ ...row, timestamp: row.timestamp || timestamp }));
+    rerankedBottom10_1 = rerankedBottom10_1.map(row => ({ ...row, timestamp: row.timestamp || timestamp }));
+    rerankedTop10_2 = rerankedTop10_2.map(row => ({ ...row, timestamp: row.timestamp || timestamp }));
+    rerankedBottom10_2 = rerankedBottom10_2.map(row => ({ ...row, timestamp: row.timestamp || timestamp }));
+    detailedResponses1 = detailedResponses1.map(row => ({ ...row, timestamp: row.timestamp || timestamp }));
+    detailedResponses2 = detailedResponses2.map(row => ({ ...row, timestamp: row.timestamp || timestamp }));
+
+    const logData = {
+        subjectID,
+        qSortData1,
+        qSortData2,
+        detailedResponses1,
+        detailedResponses2,
+        rerankedTop10_1,
+        rerankedBottom10_1,
+        rerankedTop10_2,
+        rerankedBottom10_2
+    };
+    localStorage.setItem('qSortLogs', JSON.stringify(logData));
+}
+
+function loadLogsFromLocalStorage() {
+    const savedLogs = localStorage.getItem('qSortLogs');
+    if (savedLogs) {
+        const data = JSON.parse(savedLogs);
+        const hasData = data.qSortData1?.length > 0 || data.qSortData2?.length > 0 ||
+                        data.detailedResponses1?.length > 0 || data.detailedResponses2?.length > 0 ||
+                        data.rerankedTop10_1?.length > 0 || data.rerankedBottom10_1?.length > 0 ||
+                        data.rerankedTop10_2?.length > 0 || data.rerankedBottom10_2?.length > 0;
+        if (hasData) {
+            subjectID = data.subjectID || "";
+            qSortData1 = data.qSortData1 || [];
+            qSortData2 = data.qSortData2 || [];
+            detailedResponses1 = data.detailedResponses1 || [];
+            detailedResponses2 = data.detailedResponses2 || [];
+            rerankedTop10_1 = data.rerankedTop10_1 || [];
+            rerankedBottom10_1 = data.rerankedBottom10_1 || [];
+            rerankedTop10_2 = data.rerankedTop10_2 || [];
+            rerankedBottom10_2 = data.rerankedBottom10_2 || [];
+            alert("Previous session data has been restored.");
+        }
+    }
+}
+loadLogsFromLocalStorage();
+
+window.addEventListener("beforeunload", () => {
+    saveLogsToLocalStorage();
+});
+</script>
+</body>
+</html>
+

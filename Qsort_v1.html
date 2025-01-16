@@ -501,13 +501,100 @@ let rerankedBottom10_1 = [];
 let rerankedTop10_2 = [];
 let rerankedBottom10_2 = [];
 
-// Example 5 sentences
+// ==========================
+// // The 90 Sentences
+// ==========================
 const sentences = [
-    "Sentence 1: This is the first statement.",
-    "Sentence 2: Another example sentence.",
-    "Sentence 3: Sorting example here.",
-    "Sentence 4: Drag and drop example.",
-    "Sentence 5: Test another sentence."
+"You are standing in an elevator with a random stranger.",
+"You are out on a first date.",
+"An overworked nurse is going to treat your loved one.",
+"A man who owes you money also owes money to a dangerous individual.",
+"An employee of yours has just broken an ankle and is asking not to come into work.",
+"You are speaking to a politician about a policy you are passionate about.",
+"You are standing behind a stranger at the grocery store.",
+"A homeless man has taken a space outside your house/apartment building because he does not have a place to sleep tonight.",
+"You are being evaluated by your driving test instructor.",
+"You are considering asking a famous celebrity that you see in a restaurant for an autograph.",
+"Your roommate might get suspended for cheating with you on a test.",
+"A classmate asks for help because they are failing the class.",
+"You found out your best friend’s partner is cheating on them.",
+"A customer where you work begins to yell at you, but you are not sure why.",
+"Someone who is supporting you through a difficult time is reliving their trauma of being raped.",
+"You walk into a party where you do not know anyone else.",
+"An opponent in a race you are participating in believes they may be suffering a heart attack.",
+"You think your friend is telling lies about you.",
+"You are seeing an old friend after a really long time.",
+"You are trying to plan the perfect birthday party for your partner.",
+"A vendor at Costco is offering you a food sample.",
+"You are meeting your significant other’s family for the first time.",
+"You and your friend are both interviewing for the same job.",
+"You have been asked to sell something to a vulnerable customer.",
+"You want to ask your boss for a raise, but they seem to be in a bad mood.",
+"Your significant other’s parents seem upset about something you said.",
+"You are going into your annual review meeting.",
+"The driver in front of you has a terrible case of road rage.",
+"A journalist friend is writing their first big piece, and they have chosen to write it on you.",
+"You see a woman grieving loudly over the grave of her dead mother.",
+"Your partner seems to be upset about something.",
+"You bump into your ex who you left on bad terms.",
+"During a deep conversation, your friend suddenly seems worried about telling you something.",
+"You are unexpectedly called to HR.",
+"You are negotiating on a price at the farmer’s market.",
+"A friend who owes you money has just won the lottery.",
+"You are about to propose to your partner.",
+"You are working with an autistic child who is being a bit difficult.",
+"You want to ask someone out on a date.",
+"Your sister-in-law tells you she was assaulted by her husband/your brother.",
+"You are competing with a friend in a game of strategy.",
+"You are speaking with your doctor at your annual checkup.",
+"You are going for a job interview.",
+"A woman you helped get into rehab can't get clean.",
+"A friend is out celebrating his/her birthday and has not invited you.",
+"You are speaking to a research assistant about a study that you are participating in.",
+"You are playing rock paper scissors with a friend.",
+"You are asking someone questions about a situation you know that they have lied about before.",
+"A student who suffers from severe test anxiety has been seated next to you during a final exam.",
+"You want to ask a co-worker for a favor that may get them in trouble.",
+"You are babysitting someone else’s child.",
+"An attractive man/woman you would like to ask out has a flat tire on a deserted road.",
+"A stranger on the bus begins sharing their tragic life story with you.",
+"A house you have been wanting to purchase may come onto the market because the couple that currently owns it may lose it to bankruptcy.",
+"A friend, who was just arrested, has incriminating information about you that they could reveal.",
+"You are arguing with your parents.",
+"A child that has been abandoned on the street asks for donations.",
+"You need to tell your friend that you lost something valuable of theirs.",
+"You are arguing with your significant other.",
+"You see a new neighbor moving in next door.",
+"An important food critic is tasting your food for the first time.",
+"You are debating with someone about a social cause you have strong beliefs about.",
+"You are pulled over by the police.",
+"A man has just gotten into a car accident after yelling at you at a traffic stop.",
+"Someone approaches you to ask for directions.",
+"Someone looks like they need help, but it is unclear if they’ll be embarrassed if you approach them.",
+"You need to ask your professor for a reference letter.",
+"A man who has the same position as you at work is celebrating a big raise.",
+"You are in front of a judge in traffic court.",
+"Your waiter is struggling with too many tables and is slow to bring your food.",
+"You are talking to a bank teller about opening an account.",
+"You are working with a trainer at the gym.",
+"You just beat someone in a high-stakes game.",
+"One of the members of your group project seems distressed and is not pulling their weight.",
+"You are debating with someone about something you do not have a clear opinion about.",
+"You need to get your boss a Secret Santa present.",
+"A family member catches you doing something morally wrong.",
+"A new person is invited into your friend group.",
+"Your therapist just canceled their appointment with you last minute.",
+"You just moved in with a new roommate who seems stressed.",
+"Your boss tells you that they may be taking a new job.",
+"Someone you are interested in is getting ‘hit on’.",
+"You are worried that your friend is mad at you for something you did.",
+"Your best friend just found out that you and their partner had hooked up.",
+"A prostitute stands on the street corner where you live looking for her next client.",
+"You are asking a bank manager for a loan.",
+"Your art teacher is viewing your art project.",
+"You are ordering popcorn from a teenager at the movies.",
+"Your child’s teacher tells you they are having a hard time controlling their class.",
+"Someone you are interested in seems to be avoiding you recently."
 ];
 let currentIndex = 0;
 const draggable = document.getElementById("draggable");
@@ -963,8 +1050,7 @@ function startSecondQSort() {
 
     document.getElementById("sentence-box-intro").innerHTML = `
         <br>
-        How motivated would you be to share the feelings of the person 
-        <strong>for your benefit</strong>?
+        How motivated would you be to share the feelings of the person <strong>for your benefit</strong>?
     `;
 
     document.getElementById("sorting-section").style.display = "block";
@@ -1309,7 +1395,7 @@ function downloadCSV() {
 
         setTimeout(() => { 
             clearLogsFromLocalStorage();
-            window.location.href = "https://uoitsocialscience.eu.qualtrics.com/jfe/form/SV_bgsqyPhQinUzOYe";
+            window.location.href = "https://uoitsocialscience.eu.qualtrics.com/jfe/form/SV_8wCmzDwF4NY0BrE";
         }, 100);
     } catch (error) {
         console.error("Error during CSV download:", error);
