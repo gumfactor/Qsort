@@ -4,7 +4,7 @@
     <title>Q-Sort Task</title>
     <style>
         #draggable {
-            width: 500px;
+            min-width: 500px;
             height: 50px;
             background-color: lightblue;
             text-align: center;
@@ -107,10 +107,14 @@
             margin: 40px 0 40px 250px;
         }
         #zoomed-bin .sortable-item span {
+            position: relative;
+            text-align: center;
             font-family: Arial, sans-serif;
             font-size: 16px;
         }
         #bottom-bin .sortable-item span {
+            position: relative;
+            text-align: center;
             font-family: Arial, sans-serif;
             font-size: 16px;
         }
@@ -126,11 +130,20 @@
         #bottom-section p {
             margin-top: -15px;
         }
-        #ContinueToTaskButton, #BeginTaskButton3, #continueToDetailedQuestionsButton, #BeginTaskButton2, #BeginTaskButton, #subjectIDButton, #finalizeSortButton, #finalizeRerankButton, #finalizeBottomRerankButton, #continueButton {
+        #ContinueToTaskButton, #BeginTaskButton3, #continueToDetailedQuestionsButton, #BeginTaskButton2, #BeginTaskButton, #subjectIDButton, #finalizeSortButton, #continueButton {
             border: none;
             border-radius: 8px;
             cursor: pointer;
             transition: background-color 0.3s ease;
+        }
+        #finalizeRerankButton, #finalizeBottomRerankButton {
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: block;
+            margin: 20px auto 0; /* Add margin to separate it from the rectangle */
+            position: relative; /* Ensure it moves dynamically with the rectangle */
         }
         #ContinueToTaskButton:hover, #BeginTaskButton3:hover, #continueToDetailedQuestionsButton:hover, #BeginTaskButton2:hover, #BeginTaskButton:hover, #subjectIDButton:hover, #finalizeSortButton:hover, #finalizeRerankButton:hover, #finalizeBottomRerankButton:hover, #continueButton:hover {
             background-color: #28a745;
@@ -416,10 +429,10 @@
     <h2>Rerank Your <span style="color: green;">Top</span> 10 Sentences</h2><br>
     <p>These are the top 10 scenarios that you ranked as <strong><span style="color: green;">most empathically motivating</span></strong>.</p><br>
     <p>We would now like you to consider the very specific order of these scenarios, and to re-sort them so that they are ordered from the <strong><span style="color: green;">very most</span></strong> (on the top), to the <strong><span style="color: red;"> very least</span></strong> (on the bottom) empathically motivating .</p>
-    <div class="dropzone" id="zoomed-bin" style="width: 400px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 2px dashed gray; padding: 20px; text-align: center;">
+    <div class="dropzone" id="zoomed-bin" style="width: 400px; margin: 0 auto; border: 2px dashed gray; padding: 20px; text-align: center;">
         <div class="sortable-wrapper"></div>
     </div>
-    <button id="finalizeRerankButton" style="padding: 10px 20px; position: absolute; top: 60%; left: 50%; transform: translateX(-50%); margin-top: 50px;">
+    <button id="finalizeRerankButton" style="padding: 10px 20px; margin-top: 20px;">
         Finalize Rerank
     </button>
 </div>
@@ -428,10 +441,10 @@
     <h2>Rerank Your <span style="color: red;">Bottom</span> 10 Sentences</h2><br>
     <p>These are the bottom 10 scenarios that you ranked as <strong><span style="color: red;">least empathically motivating</span></strong>.</p><br>
     <p>We would now like you to consider the very specific order of these scenarios, and to resort them so that they are ordered from the <strong><span style="color: red;">very least</span></strong> (on the top), to the <strong><span style="color: green;">very most</span></strong> empathically motivating (on the bottom).</p>
-    <div class="dropzone" id="bottom-bin" style="width: 400px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 2px dashed gray; padding: 20px; text-align: center;">
+    <div class="dropzone" id="bottom-bin" style="width: 400px; margin: 0 auto; border: 2px dashed gray; padding: 20px; text-align: center;">
         <div class="sortable-wrapper"></div>
     </div>
-    <button id="finalizeBottomRerankButton" style="padding: 10px 20px; position: absolute; top: 60%; left: 50%; transform: translateX(-50%); margin-top: 50px;">
+    <button id="finalizeBottomRerankButton" style="padding: 10px 20px; margin-top: 20px;">
         Finalize Rerank
     </button>
 </div>
@@ -449,7 +462,7 @@
 // Basic Setup
 // ==========================
 const taskName = "ECT1 Q-Sort";
-const versionNumber = "V2 (Nonvirtuous Qsort first)"
+const versionNumber = "V1 (Virtuous Qsort first)";
 let subjectID = "";
 const startTime = new Date();
 let qSortState = "firstQSort"; 
@@ -487,6 +500,10 @@ document.getElementById("continueButton").addEventListener("click", function () 
     this.style.display = "none";
 });
 
+document.getElementById("ContinueToTaskButton").addEventListener("click", function() {
+        document.getElementById("NextRoundInstructions").style.display = "none";
+        startSecondQSort();
+    });
 
 // ==========================
 // Data Arrays
@@ -851,13 +868,21 @@ function computeScenarioLabel(itemIndex, totalItems) {
     }
 }
 
+// ==========================
+// Helper: Sentence number
+// ==========================
+function getScenarioNumber(sentenceText) {
+    const index = sentences.indexOf(sentenceText);
+    return index >= 0 ? index + 1 : "";
+}
 
 // ==========================
 // showQuestions() => Q1/Q2, then Q3/Q4
 // ==========================
 function showQuestions() {
     // Figure out top/bottom items, but DON'T display them yet
-    const { topThree, bottomThree } = getTopAndBottomThreeItems();
+    const topThree = getTopThreeFromRerank();
+    const bottomThree = getBottomThreeFromRerank();
     const allItems = [...topThree, ...bottomThree];
 
     // 1) Show the instructions (#intro-text)
@@ -906,37 +931,76 @@ function showQuestions() {
 // ==========================
 // Finalize Sort => show top/bottom bin
 // ==========================
-document.getElementById("finalizeSortButton").addEventListener("click", () => {
+function finalizeSort() {
+    // Prevent finalizing if there's still a draggable sentence displayed
     if (draggable.style.display !== "none" && draggable.textContent.trim() !== "") {
         alert("Please sort all sentences into bins before finalizing.");
         return;
     }
+
+    // Collect items from the DOM
     const bins = document.querySelectorAll("#sorting-section .dropzone");
-    qSortData = [];
+    const collectedData = [];
+
     bins.forEach((bin, binIndex) => {
         const items = bin.querySelectorAll(".sortable-item span");
         items.forEach((item, itemIndex) => {
-            qSortData.push({
+            collectedData.push({
                 bin: binIndex + 1,
                 position: itemIndex + 1,
-                text: item.textContent
+                text: item.textContent.trim(),
             });
         });
     });
+
+    // Store the results in the correct Q-sort array
     if (qSortState === "firstQSort") {
-        qSortData1 = [...qSortData];
+        qSortData1 = [...collectedData];
     } else {
-        qSortData2 = [...qSortData];
+        qSortData2 = [...collectedData];
     }
+
+    // Save to localStorage
     saveLogsToLocalStorage();
 
+    // Switch to zoomed-section (top 10 re-rank)
     populateZoomedBin();
     document.getElementById("sorting-section").style.display = "none";
     document.getElementById("zoomed-section").style.display = "block";
-});
+}
 
+// Attach our new finalizeSort function to the button
+document.getElementById("finalizeSortButton").addEventListener("click", finalizeSort);
+
+// ==========================
+// Data-centric Top/Bottom Calculation
+// ==========================
+function rankSentences(qSortDataArray) {
+    const sorted = [...qSortDataArray].sort((a, b) => {
+        if (a.bin !== b.bin) return b.bin - a.bin;
+        return b.position - a.position;
+    });
+    sorted.forEach((item, index) => item.rank = index + 1);
+    return sorted;
+}
+
+function getTopAndBottom10(qSortDataArray) {
+    const ranked = rankSentences(qSortDataArray);
+    const top10 = ranked.slice(0, 10);
+    const bottom10 = ranked.slice(-10);
+    return { top10, bottom10 };
+}
+
+// ==========================
+// Updated populateZoomedBin and populateBottomBin
+// ==========================
 function populateZoomedBin() {
-    const top10Items = getTop10Items();
+    let top10Items;
+    if(qSortState === "firstQSort") {
+        top10Items = getTopAndBottom10(qSortData1).top10;
+    } else {
+        top10Items = getTopAndBottom10(qSortData2).top10;
+    }
     const zoomedWrapper = document.querySelector("#zoomed-bin .sortable-wrapper");
     zoomedWrapper.innerHTML = "";
     top10Items.forEach((item, index) => {
@@ -949,6 +1013,32 @@ function populateZoomedBin() {
         zoomedWrapper.appendChild(newItem);
     });
 }
+
+function populateBottomBin() {
+    let bottom10Items;
+    if(qSortState === "firstQSort") {
+        bottom10Items = getTopAndBottom10(qSortData1).bottom10;
+    } else {
+        bottom10Items = getTopAndBottom10(qSortData2).bottom10;
+    }
+    bottom10Items.reverse();
+
+    const bottomWrapper = document.querySelector("#bottom-bin .sortable-wrapper");
+    bottomWrapper.innerHTML = "";
+    bottom10Items.forEach((item, index) => {
+        const newItem = document.createElement("div");
+        newItem.className = "sortable-item";
+        newItem.innerHTML = `
+            <span>${item.text}</span>
+            <div class="position-icon">${index + 1}</div>
+        `;
+        bottomWrapper.appendChild(newItem);
+    });
+}
+
+// ==========================
+// Sortable Setup for Reranking
+// ==========================
 new Sortable(document.querySelector("#zoomed-bin .sortable-wrapper"), {
     animation: 150,
     onUpdate: function () {
@@ -966,7 +1056,8 @@ document.getElementById("finalizeRerankButton").addEventListener("click", () => 
     zoomedItems.forEach((item, index) => {
         rerankedTopItems.push({
             position: index + 1,
-            text: item.textContent
+            text: item.textContent,
+            timestamp: new Date().toISOString()
         });
     });
     if (qSortState === "firstQSort") {
@@ -980,20 +1071,6 @@ document.getElementById("finalizeRerankButton").addEventListener("click", () => 
     document.getElementById("bottom-section").style.display = "block";
 });
 
-function populateBottomBin() {
-    const bottom10Items = getBottom10Items();
-    const bottomWrapper = document.querySelector("#bottom-bin .sortable-wrapper");
-    bottomWrapper.innerHTML = "";
-    bottom10Items.forEach((item, index) => {
-        const newItem = document.createElement("div");
-        newItem.className = "sortable-item";
-        newItem.innerHTML = `
-            <span>${item.text}</span>
-            <div class="position-icon">${index + 1}</div>
-        `;
-        bottomWrapper.appendChild(newItem);
-    });
-}
 new Sortable(document.querySelector("#bottom-bin .sortable-wrapper"), {
     animation: 150,
     onUpdate: function () {
@@ -1011,7 +1088,8 @@ document.getElementById("finalizeBottomRerankButton").addEventListener("click", 
     bottomItems.forEach((item, index) => {
         rerankedBottomItems.push({
             position: index + 1,
-            text: item.textContent
+            text: item.textContent,
+            timestamp: new Date().toISOString()
         });
     });
     if (qSortState === "firstQSort") {
@@ -1029,6 +1107,15 @@ document.getElementById("finalizeBottomRerankButton").addEventListener("click", 
 // ==========================
 // Start second Q-Sort
 // ==========================
+function resetBinsForNewSort() {
+  // Clear contents of each dropzone and reset counters as needed
+  const dropzones = document.querySelectorAll("#sorting-section .dropzone .sortable-wrapper");
+  dropzones.forEach(wrapper => {
+    wrapper.innerHTML = "";
+    updateCountAndPositions(wrapper);
+  });
+}
+
 function startSecondQSort() {
     if (qSortState !== "secondQSort") {
         console.warn("Cannot start second Q-Sort. Current state:", qSortState);
@@ -1037,17 +1124,9 @@ function startSecondQSort() {
     if (qSortData1.length === 0) {
         console.warn("Warning: qSortData1 is empty before starting second Q-Sort.");
     }
-    qSortData1 = [...qSortData];
-    qSortData = [];
-    qSortData2 = qSortData;
 
     // Reset bins
-    const bins = document.querySelectorAll("#sorting-section .dropzone .sortable-wrapper");
-    bins.forEach(bin => {
-        bin.innerHTML = "";
-        const countElement = bin.parentElement.querySelector(".count-icon");
-        if (countElement) countElement.textContent = "0";
-    });
+    resetBinsForNewSort();  // Reset bins for fresh second round
 
     document.getElementById("sentence-box-intro").innerHTML = `
         <br>
@@ -1065,84 +1144,23 @@ function startSecondQSort() {
 }
 
 // ==========================
-// Utility: get top/bottom
+// Utility: get top/bottom for questions
 // ==========================
-function getTop10Items() {
-    const allBins = document.querySelectorAll(".dropzone .sortable-wrapper");
-    const allItems = [];
-    allBins.forEach((bin, binIndex) => {
-        const items = bin.querySelectorAll(".sortable-item span");
-        items.forEach((item, itemIndex) => {
-            if (item.textContent.trim() !== "Practice Sentence: Drag me into a bin!") {
-                allItems.push({
-                    bin: binIndex + 1,
-                    position: itemIndex + 1,
-                    text: item.textContent
-                });
-            }
-        });
-    });
-    allItems.sort((a, b) => (a.bin - b.bin) || (a.position - b.position));
-    const unique = [];
-    const seen = new Set();
-    for (let obj of allItems) {
-        if (!seen.has(obj.text)) {
-            seen.add(obj.text);
-            unique.push(obj);
-        }
+
+function getTopThreeFromRerank() {
+    if (qSortState === "firstQSort") {
+        return rerankedTop10_1.slice(0, 3);
+    } else {
+        return rerankedTop10_2.slice(0, 3);
     }
-    return unique.slice(0, 10);
 }
 
-function getBottom10Items() {
-    const allBins = document.querySelectorAll(".dropzone .sortable-wrapper");
-    const allItems = [];
-    allBins.forEach((bin, binIndex) => {
-        const items = bin.querySelectorAll(".sortable-item span");
-        items.forEach((item, itemIndex) => {
-            if (item.textContent.trim() !== "Practice Sentence: Drag me into a bin!") {
-                allItems.push({
-                    bin: binIndex + 1,
-                    position: itemIndex + 1,
-                    text: item.textContent
-                });
-            }
-        });
-    });
-    // Sort descending
-    allItems.sort((a, b) => (b.bin - a.bin) || (b.position - a.position));
-    const unique = [];
-    const seen = new Set();
-    for (let obj of allItems) {
-        if (!seen.has(obj.text)) {
-            seen.add(obj.text);
-            unique.push(obj);
-        }
+function getBottomThreeFromRerank() {
+    if (qSortState === "firstQSort") {
+        return rerankedBottom10_1.slice(0, 3);
+    } else {
+        return rerankedBottom10_2.slice(0, 3);
     }
-    return unique.slice(0, 10);
-}
-
-// For final questions
-function getTopAndBottomThreeItems() {
-    const allBins = document.querySelectorAll(".dropzone .sortable-wrapper");
-    const allItems = [];
-    allBins.forEach((bin, binIndex) => {
-        const items = bin.querySelectorAll(".sortable-item span");
-        items.forEach((item, itemIndex) => {
-            allItems.push({
-                bin: binIndex + 1,
-                position: itemIndex + 1,
-                text: item.textContent.trim()
-            });
-        });
-    });
-    const filtered = allItems.filter(i =>
-        i.text.toLowerCase() !== "practice sentence: drag me into a bin!"
-    );
-    filtered.sort((a, b) => (a.bin - b.bin) || (a.position - b.position));
-    const topThree = filtered.slice(0, 3);
-    const bottomThree = filtered.slice(-3);
-    return { topThree, bottomThree };
 }
 
 // ==========================
@@ -1284,11 +1302,6 @@ practiceDropzones.forEach(dropzone => {
                 this.style.display = "none";
             });
 
-            // starting the next round
-            document.getElementById("ContinueToTaskButton").addEventListener("click", function() {
-            document.getElementById("NextRoundInstructions").style.display = "none";
-            startSecondQSort();
-            });
         }
         practiceDraggable.setAttribute("data-origin", "");
     });
@@ -1350,17 +1363,20 @@ function downloadCSV() {
     csvContent += `Duration,${duration} seconds\n`;
     csvContent += `SubjectID,${subjectID}\n\n`;
 
-    csvContent += "First Q-Sort Data\nTimestamp,Bin,Position,Text\n";
+    csvContent += "First Q-Sort Data\nTimestamp,Bin,Position,ScenarioNumber,Text\n";
     qSortData1.forEach(row => {
-        csvContent += `${row.timestamp},${row.bin},${row.position},"${row.text}"\n`;
+        const scenarioNum = getScenarioNumber(row.text);
+        csvContent += `${row.timestamp},${row.bin},${row.position},${scenarioNum},"${row.text}"\n`;
     });
-    csvContent += "\nFirst Top 10 Rerank\nTimestamp,Position,Text\n";
+    csvContent += "\nFirst Top 10 Rerank\nTimestamp,Position,ScenarioNumber,Text\n";
     rerankedTop10_1.forEach(row => {
-        csvContent += `${row.timestamp},${row.position},"${row.text}"\n`;
+        const scenarioNum = getScenarioNumber(row.text);
+        csvContent += `${row.timestamp},${row.position},${scenarioNum},"${row.text}"\n`;
     });
-    csvContent += "\nFirst Bottom 10 Rerank\nTimestamp,Position,Text\n";
+    csvContent += "\nFirst Bottom 10 Rerank\nTimestamp,Position,ScenarioNumber,Text\n";
     rerankedBottom10_1.forEach(row => {
-        csvContent += `${row.timestamp},${row.position},"${row.text}"\n`;
+        const scenarioNum = getScenarioNumber(row.text);
+        csvContent += `${row.timestamp},${row.position},${scenarioNum},"${row.text}"\n`;
     });
 
     csvContent += "\nDetailed Responses (First Q-Sort)\nTimestamp,Question,Why Motivating,How to Improve,Power Dynamic,Power Influence,Other Factors\n";
@@ -1368,17 +1384,20 @@ function downloadCSV() {
         csvContent += `${r.timestamp},"${r.question}","${r.whyMotivating || ''}","${r.howToImprove || ''}","${r.powerDynamic || ''}","${r.powerInfluence || ''}","${r.anythingElse || ''}"\n`;
     });
 
-    csvContent += "\nSecond Q-Sort Data\nTimestamp,Bin,Position,Text\n";
+    csvContent += "\nSecond Q-Sort Data\nTimestamp,Bin,Position,ScenarioNumber,Text\n";
     qSortData2.forEach(row => {
-        csvContent += `${row.timestamp},${row.bin},${row.position},"${row.text}"\n`;
+        const scenarioNum = getScenarioNumber(row.text);
+        csvContent += `${row.timestamp},${row.bin},${row.position},${scenarioNum},"${row.text}"\n`;
     });
-    csvContent += "\nSecond Top 10 Rerank\nTimestamp,Position,Text\n";
+    csvContent += "\nSecond Top 10 Rerank\nTimestamp,Position,ScenarioNumber,Text\n";
     rerankedTop10_2.forEach(row => {
-        csvContent += `${row.timestamp},${row.position},"${row.text}"\n`;
+        const scenarioNum = getScenarioNumber(row.text);
+        csvContent += `${row.timestamp},${row.position},${scenarioNum},"${row.text}"\n`;
     });
-    csvContent += "\nSecond Bottom 10 Rerank\nTimestamp,Position,Text\n";
+    csvContent += "\nSecond Bottom 10 Rerank\nTimestamp,Position,ScenarioNumber,Text\n";
     rerankedBottom10_2.forEach(row => {
-        csvContent += `${row.timestamp},${row.position},"${row.text}"\n`;
+        const scenarioNum = getScenarioNumber(row.text);
+        csvContent += `${row.timestamp},${row.position},${scenarioNum},"${row.text}"\n`;
     });
 
     csvContent += "\nDetailed Responses (Second Q-Sort)\nTimestamp,Question,Why Motivating,How to Improve,Power Dynamic,Power Influence,Other Factors\n";
