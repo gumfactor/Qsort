@@ -173,6 +173,49 @@
     <p><i>Please let the researcher know if you do not have a Participant ID</i></p>
 </div>
 
+<div id="bins-check-screen" style="display: none; text-align: center; margin-top: 100px; font-family: Arial, sans-serif;">
+    <p style="font-size: 18px;">
+      Before we start, we just need to ask you to adjust your screen resolution to ensure that all of the study elements display properly on your monitor. 
+      <br><br>
+      <strong>To do so, please zoom your screen in or out so that the 9 squares that you see below are as big as they can be while still appearing on a single row.</strong> 
+      <br><br>
+      (You can zoom in/out by pressing the ctrl key (on Windows) or the cmd key (on Mac) and either pressing the +/- keys on your keyboard, or scrolling up/down with your mouse)
+      <br><br>
+    </p>
+    <div id="bins-check-container" style="text-align: center;">
+        <div class="dropzone-container">
+          <div class="dropzone" style="width: 160px; height: 160px;"></div>
+        </div>
+        <div class="dropzone-container">
+          <div class="dropzone" style="width: 160px; height: 160px;"></div>
+        </div>
+        <div class="dropzone-container">
+          <div class="dropzone" style="width: 160px; height: 160px;"></div>
+        </div>
+        <div class="dropzone-container">
+          <div class="dropzone" style="width: 160px; height: 160px;"></div>
+        </div>
+        <div class="dropzone-container">
+          <div class="dropzone" style="width: 160px; height: 160px;"></div>
+        </div>
+        <div class="dropzone-container">
+          <div class="dropzone" style="width: 160px; height: 160px;"></div>
+        </div>
+        <div class="dropzone-container">
+          <div class="dropzone" style="width: 160px; height: 160px;"></div>
+        </div>
+        <div class="dropzone-container">
+          <div class="dropzone" style="width: 160px; height: 160px;"></div>
+        </div>
+        <div class="dropzone-container">
+          <div class="dropzone" style="width: 160px; height: 160px;"></div>
+        </div>
+      </div>
+    <button id="bins-check-button" style="padding: 10px 20px; font-size: 16px; margin-top: 20px;">
+      All 9 bins are now on a single row
+    </button>
+  </div>
+
 <!-- Instructions Section -->
 <div id="instructions-section" style="display: none; font-family: Arial, Helvetica, sans-serif;">
     <h1 id="task-header" style="text-align: center; margin-top: 100px;">The Empathic Q-Sort Task</h1>
@@ -458,6 +501,22 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
 <script>
+// ======================================
+// Ensures Only Desktop Browsers are Used
+//=======================================
+if (/Mobi|Android|iPhone|iPad|iPod|Tablet/i.test(navigator.userAgent)) {
+    document.addEventListener("DOMContentLoaded", function() {
+      document.body.innerHTML = `
+        <div style="text-align: center; font-family: Arial, sans-serif; margin-top: 200px;">
+          <h2>This task can only be run on a Desktop browser.</h2>
+          <p>Please switch to a desktop computer to continue.</p>
+        </div>
+      `;
+    });
+    // Stop further script execution.
+    throw new Error("Not supported on mobile devices.");
+  }
+  
 // ==========================
 // Basic Setup
 // ==========================
@@ -472,14 +531,14 @@ document.getElementById("subjectID").addEventListener("input", (event) => {
 });
 
 document.getElementById("subjectIDButton").addEventListener("click", function () {
-    const input = document.getElementById("subjectID").value; 
-    if (/^\d{4}$/.test(input)) {
-        subjectID = input;
-        document.getElementById("subject-id-section").style.display = "none"; 
-        document.getElementById("instructions-section").style.display = "block";
-    } else {
-        alert("Please enter a valid 4-digit Subject ID.");
-    }
+  const input = document.getElementById("subjectID").value;
+  if (/^\d{4}$/.test(input)) {
+    subjectID = input;  // assuming subjectID is declared globally
+    document.getElementById("subject-id-section").style.display = "none";
+    document.getElementById("bins-check-screen").style.display = "block";
+  } else {
+    alert("Please enter a valid 4-digit Subject ID.");
+  }
 });
 
 window.addEventListener("load", () => {
@@ -504,6 +563,28 @@ document.getElementById("ContinueToTaskButton").addEventListener("click", functi
         document.getElementById("NextRoundInstructions").style.display = "none";
         startSecondQSort();
     });
+
+// Bins check button handler
+    document.getElementById("bins-check-button").addEventListener("click", function() {
+    const bins = document.querySelectorAll("#bins-check-container .dropzone");
+    if (bins.length !== 9) {
+    alert("Error: not all 9 bins are present.");
+    return;
+    }
+    const firstOffset = bins[0].offsetTop;
+    let allOnOneRow = true;
+    bins.forEach(bin => {
+    if (bin.offsetTop !== firstOffset) {
+        allOnOneRow = false;
+    }
+    });
+    if (allOnOneRow) {
+    document.getElementById("bins-check-screen").style.display = "none";
+    document.getElementById("instructions-section").style.display = "block";
+    } else {
+    alert("All 9 bins must be on a single row before continuing. Please adjust your browser zoom so the bins are as big as possible while still fitting in one single row.");
+    }
+});
 
 // ==========================
 // Data Arrays
@@ -547,6 +628,7 @@ const sentences = [
 "You are meeting your significant other’s family for the first time.",
 "You and your friend are both interviewing for the same job.",
 "You have been asked to sell something to a vulnerable customer.",
+"Attention Check: Please just place this bin in Bin #6."
 "You want to ask your boss for a raise, but they seem to be in a bad mood.",
 "Your significant other’s parents seem upset about something you said.",
 "You are going into your annual review meeting.",
@@ -601,6 +683,7 @@ const sentences = [
 "You need to get your boss a Secret Santa present.",
 "A family member catches you doing something morally wrong.",
 "A new person is invited into your friend group.",
+"Attention Check: Please just place this bin in Bin #3."
 "Your therapist just canceled their appointment with you last minute.",
 "You just moved in with a new roommate who seems stressed.",
 "Your boss tells you that they may be taking a new job.",
